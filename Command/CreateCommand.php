@@ -27,9 +27,9 @@ class CreateCommand extends Command
     protected function configure()
     {
         $this
-            ->setName('test:test')
-            
-            ->setDescription('create')
+            ->setName(self::$defaultName)
+            ->setDescription('Create Typsenses indexes')
+
         ;
     }
     protected function execute(InputInterface $input, OutputInterface $output): int
