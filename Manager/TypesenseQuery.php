@@ -32,15 +32,46 @@ class TypesenseQuery
     {
         return $this->addParameter('sort_by', $sortBy);
     }
-    
-    // facet_by
-    // max_facet_values
-    // num_typos
-    // page
-    // per_page
-    // include_fields
-    // exclude_fields
-    // drop_tokens_threshold
+
+    public function facetBy(string $facetBy)
+    {
+        return $this->addParameter('facet_by', $facetBy);
+    }
+
+    public function maxFacetValues(int $maxFacetValues)
+    {
+        return $this->addParameter('max_facet_values', $maxFacetValues);
+    }
+
+    public function numTypos(int $numTypos)
+    {
+        return $this->addParameter('num_typos', $numTypos);
+    }
+
+    public function page(int $page)
+    {
+        return $this->addParameter('page', $page);
+    }
+
+    public function perPage(int $perPage)
+    {
+        return $this->addParameter('per_page', $perPage);
+    }
+
+    public function includeFields(string $includeFields)
+    {
+        return $this->addParameter('include_fields', $includeFields);
+    }
+
+    public function excludeFields(string $excludeFields)
+    {
+        return $this->addParameter('exclude_fields', $excludeFields);
+    }
+
+    public function dropTokensThreshold(int $dropTokensThreshold)
+    {
+        return $this->addParameter('drop_tokens_threshold', $dropTokensThreshold);
+    }
 
     private function addParameter($key, $value)
     {
