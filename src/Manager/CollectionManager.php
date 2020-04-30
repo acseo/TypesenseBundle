@@ -71,7 +71,7 @@ class CollectionManager
             return 'int32';
         }
         if ($type == 'primary') {
-            return 'string';
+            return 'int32';
         }
 
         return $type;

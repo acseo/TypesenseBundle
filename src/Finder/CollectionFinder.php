@@ -33,15 +33,17 @@ class CollectionFinder
     private function hydrate($results)
     {
         $ids = [];
+        $primaryKeyInfos = $this->getPrimaryKeyInfo();
         foreach ($results->getResults() as $result) {
-            $ids[] = $result['document']['id'];
+            $ids[] = $result['document'][$primaryKeyInfos['documentAttribute']];
         }
-        $hydratedResults = $this->em->getRepository('App\Entity\Book')->findBy(['id' => $ids]);
+        $hydratedResults = $this->em->getRepository('App\Entity\Book')->findBy([$primaryKeyInfos['entityAttribute'] => $ids]);
         $results->setHydratedHits($hydratedResults);
         $results->setHydrated(true);
 
         return $results;
     }
+
     private function search(TypesenseQuery $query)
     {
         $result = $this->collectionClient->get(
@@ -50,5 +52,15 @@ class CollectionFinder
         );
 
         return new TypesenseResponse($result);
+    }
+
+    private function getPrimaryKeyInfo()
+    {
+        foreach($this->collectionConfig['fields'] as $name => $config) {
+            if ($config['type'] == 'primary') {
+                return ['entityAttribute' => $name, 'documentAttribute' => $config['name']];
+            }
+        }
+        throw new \Exception(sprintf('Primary key info have not been found for Typesense collection %s', $this->collectionConfig['typesense_name']));
     }
 }

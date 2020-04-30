@@ -21,15 +21,20 @@ class ACSEOTypesenseExtension extends Extension
 
     public function load(array $configs, ContainerBuilder $container)
     {
+        $configuration = new Configuration();
+
+        $config = $this->processConfiguration($configuration, $configs);
+
+        if (empty($config['typesense']) || empty($config['collections'])) {
+            // No Host or collection are defined
+            return;
+        }
+
         $loader = new XMlFileLoader(
             $container,
             new FileLocator(__DIR__.'/../Resources/config')
         );
         $loader->load('services.xml');
-
-        $configuration = new Configuration();
-
-        $config = $this->processConfiguration($configuration, $configs);
 
         $this->loadClient($config['typesense'], $container);
         
@@ -71,6 +76,22 @@ class ACSEOTypesenseExtension extends Extension
     {
         foreach ($collections as $name => $config) {
             $collectionName = isset($config['collection_name']) ? $config['collection_name'] : $name;
+
+            $primaryKeyExists = false;
+            
+            foreach($config['fields'] as $fieldConfig)
+            {
+                if ($fieldConfig['type'] == 'primary') {
+                    $primaryKeyExists = true;
+                    break;
+                }
+            }
+            if (!$primaryKeyExists) {
+                $config['fields']['id'] = [
+                    'name' => 'entity_id',
+                    'type' => 'primary'
+                ];
+            }
 
             $this->collectionsConfig[$name] = [
                 'typesense_name' => $collectionName,

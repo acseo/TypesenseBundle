@@ -52,7 +52,7 @@ acseo_typesense:
             entity: 'App\Entity\Book'              # Doctrine Entity class
             fields: 
                 id:                                # Entity attribute name
-                    name: id                       # Typesense attribute name
+                    name: entity_id                # Typesense attribute name
                     type: primary                  # Attribute type
                 title: 
                     name: title
@@ -69,10 +69,10 @@ acseo_typesense:
                 publishedAt: 
                     name : published_at
                     type: datetime
-            default_sorting_field: published_at    # Default sorting field
+            default_sorting_field: published_at    # Default sorting field. Must be primary, int32 or float
 ```
 
-You can use basic types supported by Typesense for your fields : string, int32, etc.
+You can use basic types supported by Typesense for your fields : string, int32, float, etc.
 You can also use specific type names, such as : primary, collection, object
 
 Data conversion from Doctrine entity to Typesense data is managed by `ACSEO\TypesenseBundle\Transformer\DoctrineToTypesenseTransformer`

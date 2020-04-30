@@ -62,8 +62,8 @@ class DoctrineToTypesenseTransformer
             switch ($originalType.$castedType) {
                 case 'datetime'.'int32':
                     return $value->getTimestamp();
-                case 'primary'.'string':
-                    return (string) $value;
+                case 'primary'.'int32':
+                    return (int) $value;
                 case 'object'.'string':
                     return $value->__toString();
                 case 'collection'.'string[]':
@@ -85,7 +85,7 @@ class DoctrineToTypesenseTransformer
             return 'int32';
         }
         if ($type == 'primary') {
-            return 'string';
+            return 'int32';
         }
         if ($type == 'object') {
             return 'string';

@@ -51,23 +51,20 @@ class PopulateCommand extends Command
         $io->progressStart();
 
         $collectionDefinitions = $this->collectionManager->getCollectionDefinitions();
-        foreach ($collectionDefinitions as $collection => $collectionDefinition) {
-            $methodCalls = [];
-            foreach ($collectionDefinition['fields'] as $entityAttribute => $definition) {
-                $methodCalls[$definition['name']] = ['entityAttribute' => $entityAttribute, 'entityMethod' => 'get'.ucfirst($entityAttribute)];
-            }
+        foreach ($collectionDefinitions as $collectionDefinition) {
+            $collectionName = $collectionDefinition['typesense_name'];
 
             $repository = $this->em->getRepository($collectionDefinition['entity']);
             $entities = $repository->findAll();
             foreach ($entities as $entity) {
                 $data = $this->transformer->convert($entity);
                 try {
-                    $this->documentManager->delete($collection, $data['id']);
+                    $this->documentManager->delete($collectionName, $data['id']);
                 } catch (\Exception $e) {
                     // Silence is gold
                 }
-                
-                $this->documentManager->index($collection, $data);
+
+                $this->documentManager->index($collectionName, $data);
                 $io->progressAdvance();
             }
         }
