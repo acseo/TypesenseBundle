@@ -31,13 +31,12 @@ class CreateCommand extends Command
             
             ->setDescription('create')
         ;
-    }    
+    }
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $defs = $this->collectionManager->getCollectionDefinitions();
 
-        foreach ($defs as $name => $def)
-        {
+        foreach ($defs as $name => $def) {
             try {
                 $output->writeln(sprintf('<info>Deleting</info> <comment>%s</comment>', $name));
                 $this->collectionManager->deleteCollextion($name);

@@ -25,7 +25,7 @@ class ACSEOTypesenseExtension extends Extension
             $container,
             new FileLocator(__DIR__.'/../Resources/config')
         );
-        $loader->load('services.xml');  
+        $loader->load('services.xml');
 
         $configuration = new Configuration();
 
@@ -102,7 +102,7 @@ class ACSEOTypesenseExtension extends Extension
     {
         $managerDef = $container->getDefinition('typesense.transformer.doctrine_to_typesense');
         $managerDef->replaceArgument(0, $this->collectionsConfig);
-    }    
+    }
     
     /**
      * Loads the configured index finders.

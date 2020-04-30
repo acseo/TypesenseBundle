@@ -28,8 +28,7 @@ class PopulateCommand extends Command
         CollectionManager $collectionManager,
         DocumentManager $documentManager,
         DoctrineToTypesenseTransformer $transformer
-        )
-    {
+    ) {
         parent::__construct();
         $this->em = $em;
         $this->collectionManager = $collectionManager;
@@ -43,7 +42,7 @@ class PopulateCommand extends Command
             ->setName(self::$defaultName)
             ->setDescription('Populates collections from Database')
         ;
-    }    
+    }
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
@@ -52,23 +51,19 @@ class PopulateCommand extends Command
         $io->progressStart();
 
         $collectionDefinitions = $this->collectionManager->getCollectionDefinitions();
-        foreach ($collectionDefinitions as $collection => $collectionDefinition)
-        {
+        foreach ($collectionDefinitions as $collection => $collectionDefinition) {
             $methodCalls = [];
-            foreach($collectionDefinition['fields'] as $entityAttribute => $definition) {
+            foreach ($collectionDefinition['fields'] as $entityAttribute => $definition) {
                 $methodCalls[$definition['name']] = ['entityAttribute' => $entityAttribute, 'entityMethod' => 'get'.ucfirst($entityAttribute)];
             }
 
             $repository = $this->em->getRepository($collectionDefinition['entity']);
             $entities = $repository->findAll();
-            foreach($entities as $entity)
-            {
+            foreach ($entities as $entity) {
                 $data = $this->transformer->convert($entity);
                 try {
                     $this->documentManager->delete($collection, $data['id']);
-                }
-                catch (\Exception $e)
-                {
+                } catch (\Exception $e) {
                     // Silence is gold
                 }
                 

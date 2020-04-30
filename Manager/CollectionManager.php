@@ -23,8 +23,7 @@ class CollectionManager
     public function getManagedClassNames()
     {
         $managedClassNames = [];
-        foreach($this->collectionDefinitions as $name => $collectionDefinition) 
-        {
+        foreach ($this->collectionDefinitions as $name => $collectionDefinition) {
             $managedClassNames[$name] = $collectionDefinition['entity'];
         }
 
@@ -54,22 +53,26 @@ class CollectionManager
         $definition = $this->collectionDefinitions[$collectionDefinitionName];
         $fieldDefinitions = $definition['fields'];
         $fields = [];
-        foreach($fieldDefinitions as $key => $fieldDefinition){
+        foreach ($fieldDefinitions as $key => $fieldDefinition) {
             $fieldDefinition['type'] = $this->castType($fieldDefinition['type']);
             $fields[] = $fieldDefinition;
         }
 
         $this->collectionClient->create(
             $definition['typesense_name'],
-            $fields, 
+            $fields,
             $definition['default_sorting_field']
         );
     }
 
     private function castType($type)
     {
-        if ($type == 'datetime') return 'int32';
-        if ($type == 'primary') return 'string';
+        if ($type == 'datetime') {
+            return 'int32';
+        }
+        if ($type == 'primary') {
+            return 'string';
+        }
 
         return $type;
     }

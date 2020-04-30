@@ -2,7 +2,6 @@
 
 namespace ACSEO\TypesenseBundle\Manager;
 
-
 use ACSEO\TypesenseBundle\Client\CollectionClient;
 use Doctrine\ORM\EntityManagerInterface;
 
@@ -12,12 +11,11 @@ class CollectionFinder
     private $collectionClient;
     private $em;
 
-    public function __construct(CollectionClient $collectionClient, EntityManagerInterface $em,  array $collectionConfig)
+    public function __construct(CollectionClient $collectionClient, EntityManagerInterface $em, array $collectionConfig)
     {
         $this->collectionConfig = $collectionConfig;
         $this->collectionClient = $collectionClient;
         $this->em = $em;
-
     }
     
     public function rawQuery(TypesenseQuery $query)
@@ -47,11 +45,10 @@ class CollectionFinder
     private function search(TypesenseQuery $query)
     {
         $result = $this->collectionClient->get(
-            sprintf('%s/documents/search?', $this->collectionConfig['typesense_name']) . 
+            sprintf('%s/documents/search?', $this->collectionConfig['typesense_name']) .
             http_build_query($query->getParameters())
         );
 
         return new TypesenseResponse($result);
-
     }
 }

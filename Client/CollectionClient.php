@@ -2,8 +2,6 @@
 
 namespace ACSEO\TypesenseBundle\Client;
 
-use Symfony\Contracts\HttpClient\HttpClientInterface;
-
 class CollectionClient
 {
     private $client;
@@ -19,7 +17,7 @@ class CollectionClient
 
     public function get(string $endpoint): array
     {
-        return $this->client->get(sprintf('collections/%s',$endpoint));
+        return $this->client->get(sprintf('collections/%s', $endpoint));
     }
 
     public function list()
@@ -40,5 +38,5 @@ class CollectionClient
     public function delete(string $name)
     {
         return $this->client->delete('collections/'.$name);
-    }    
+    }
 }

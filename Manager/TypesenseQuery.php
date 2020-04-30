@@ -2,7 +2,6 @@
 
 namespace ACSEO\TypesenseBundle\Manager;
 
-
 class TypesenseQuery
 {
     private $searchParameters;
@@ -39,9 +38,9 @@ class TypesenseQuery
     // num_typos
     // page
     // per_page
-    // include_fields	
-    // exclude_fields	
-    // drop_tokens_threshold	
+    // include_fields
+    // exclude_fields
+    // drop_tokens_threshold
 
     private function addParameter($key, $value)
     {

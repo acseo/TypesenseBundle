@@ -2,7 +2,6 @@
 
 namespace ACSEO\TypesenseBundle\Manager;
 
-
 class TypesenseResponse
 {
     private $facetCounts;
@@ -27,7 +26,7 @@ class TypesenseResponse
 
     /**
      * Get the value of facetCounts
-     */ 
+     */
     public function getFacetCounts()
     {
         return $this->facetCounts;
@@ -35,7 +34,7 @@ class TypesenseResponse
 
     /**
      * Get the value of hits
-     */ 
+     */
     public function getResults()
     {
         if ($this->isHydrated) {
@@ -51,7 +50,7 @@ class TypesenseResponse
 
     /**
      * Get the value of page
-     */ 
+     */
     public function getPage()
     {
         return $this->page;
@@ -62,7 +61,7 @@ class TypesenseResponse
      * Set the value of hydratedHits
      *
      * @return  self
-     */ 
+     */
     public function setHydratedHits($hydratedHits)
     {
         $this->hydratedHits = $hydratedHits;
@@ -74,7 +73,7 @@ class TypesenseResponse
      * Set the value of isHydrated
      *
      * @return  self
-     */ 
+     */
     public function setHydrated(bool $isHydrated)
     {
         $this->isHydrated = $isHydrated;
