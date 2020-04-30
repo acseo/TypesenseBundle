@@ -33,7 +33,7 @@ return [
 
 Configure the Bundle
 
-````
+```
 # .env
 TYPESENSE_URL=localhost:8108
 DATABASE_KEY=123
