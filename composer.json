@@ -22,7 +22,7 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "ACSEO\\TypesenseBundle\\Tests": "tests/"
+            "ACSEO\\TypesenseBundle\\Tests\\": "tests/"
         }
     }
 }
