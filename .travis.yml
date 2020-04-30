@@ -14,25 +14,26 @@ matrix:
           # Minimum supported dependencies with the latest and oldest PHP version
         - php: 7.2
           env: COMPOSER_FLAGS="--prefer-stable --prefer-lowest"
-        - php: 7.0
+        - php: 7.1
           env: COMPOSER_FLAGS="--prefer-stable --prefer-lowest"
+          
           # Test the latest stable release
-        - php: 7.0
         - php: 7.1
         - php: 7.2
           env: COVERAGE=true PHPUNIT_FLAGS="-v --coverage-text"
           # Test LTS versions. This makes sure we do not use Symfony packages with version greater
-          # than 2 or 3 respectively. Read more at https://github.com/symfony/lts
-        - php: 7.2
-          env: DEPENDENCIES="symfony/lts:^2"
+          # than  3. Read more at https://github.com/symfony/lts
         - php: 7.2
           env: DEPENDENCIES="symfony/lts:^3"
+          
           # Latest commit to master
         - php: 7.2
           env: STABILITY="dev"
+
     allow_failures:
           # Dev-master is allowed to fail.
         - env: STABILITY="dev"
+
 before_install:
     - if [[ $COVERAGE != true ]]; then phpenv config-rm xdebug.ini || true; fi
     - if ! [ -z "$STABILITY" ]; then composer config minimum-stability ${STABILITY}; fi;
