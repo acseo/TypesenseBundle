@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<container xmlns="http://symfony.com/schema/dic/services"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://symfony.com/schema/dic/services
+        https://symfony.com/schema/dic/services/services-1.0.xsd">
+    <services>
+        <defaults public="true" />
+
+        <!-- Abstract definition for client. -->
+        <service id="typesense.client_prototype" class="ACSEO\TypesenseBundle\Client\TypesenseClient" public="true" abstract="true">
+            <argument /> <!-- host -->
+            <argument /> <!-- key -->
+            <argument type="service" id="http_client" />
+        </service>
+
+        <!-- Abstract definition for all finders. -->
+        <service id="typesense.finder" class="ACSEO\TypesenseBundle\Manager\CollectionFinder" public="true" abstract="true">
+            <argument type="service" id="typesense.collection_client" />
+            <argument type="service" id="doctrine.orm.entity_manager" />
+            <argument /> <!-- collection name -->
+        </service>
+
+
+        <service id="typesense.collection_client" class="ACSEO\TypesenseBundle\Client\CollectionClient" public="true">
+            <argument type="service" id="typesense.client" />
+        </service>     
+
+        <!-- typesense collection manager -->
+        <service id="typesense.collection_manager" class="ACSEO\TypesenseBundle\Manager\CollectionManager" public="true">
+            <argument type="service" id="typesense.collection_client" />
+            <argument /> <!-- collections -->
+        </service>        
+
+        <service id="typesense.document_manager" class="ACSEO\TypesenseBundle\Manager\DocumentManager" public="true">
+            <argument type="service" id="typesense.client" />
+        </service>      
+
+        <!-- doctrine -->
+        <service id="typesense.listener.doctrine_indexer" class="ACSEO\TypesenseBundle\EventListener\TypesenseIndexer">
+            <argument type="service" id="typesense.collection_manager" />
+            <argument type="service" id="typesense.document_manager" />
+            <argument type="service" id="typesense.transformer.doctrine_to_typesense" />
+            <tag name="doctrine.event_listener" event="postPersist" priority="500" connection="default"/>
+            <tag name="doctrine.event_listener" event="postUpdate" priority="500" connection="default"/>
+            <tag name="doctrine.event_listener" event="preRemove" priority="500" connection="default"/>
+        </service>
+
+        <service id="typesense.transformer.doctrine_to_typesense" class="ACSEO\TypesenseBundle\Transformer\DoctrineToTypesenseTransformer">
+           <argument /> <!-- collections -->
+        </service>
+
+        <!-- commands -->
+        <service id="typesense.command.create" class="ACSEO\TypesenseBundle\Command\CreateCommand" public="true">
+            <tag name="console.command" />
+            <argument type="service" id="typesense.collection_manager" />
+        </service>   
+
+        <service id="typesense.command.populate" class="ACSEO\TypesenseBundle\Command\PopulateCommand" public="true">
+            <tag name="console.command" />
+            <argument type="service" id="doctrine.orm.entity_manager" />
+            <argument type="service" id="typesense.collection_manager" />
+            <argument type="service" id="typesense.document_manager" />
+            <argument type="service" id="typesense.transformer.doctrine_to_typesense" />
+        </service>               
+    </services>
+</container>

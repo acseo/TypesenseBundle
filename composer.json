@@ -1,0 +1,18 @@
+{
+    "name": "acseo/typesense-bundle",
+    "type": "symfony-bundle",
+    "description": "This bundle provides integration with Typesense in Symfony",
+    "authors": [
+        {
+            "name": "Nicolas Potier",
+            "email": "nicolas.potier@acseo-conseil.fr"
+        }
+    ],    
+    "require": {
+        "doctrine/orm": "~2.4,>=2.4.5",
+        "symfony/framework-bundle": "^5"
+    },
+    "autoload": {
+        "psr-4": { "ACSEO\\TypesenseBundle\\": "./" }
+    }
+}
