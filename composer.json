@@ -1,18 +1,23 @@
 {
     "name": "acseo/typesense-bundle",
-    "type": "symfony-bundle",
     "description": "This bundle provides integration with Typesense in Symfony",
+    "type": "symfony-bundle",
+    "license": "MIT",
     "authors": [
         {
             "name": "Nicolas Potier",
-            "email": "nicolas.potier@acseo-conseil.fr"
+            "email": "nicolas.potier@acseo.fr"
         }
     ],    
     "require": {
+        "php": "^7.1.3",
         "doctrine/orm": "~2.4,>=2.4.5",
-        "symfony/framework-bundle": "^5"
+        "symfony/framework-bundle": "^3.4 || ^5.0"
     },
     "autoload": {
         "psr-4": { "ACSEO\\TypesenseBundle\\": "./" }
+    },
+    "require-dev": {
+        "symfony/phpunit-bridge": "^5.0"
     }
 }
