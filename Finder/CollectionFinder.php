@@ -1,6 +1,6 @@
 <?php
 
-namespace ACSEO\TypesenseBundle\Manager;
+namespace ACSEO\TypesenseBundle\Finder;
 
 use ACSEO\TypesenseBundle\Client\CollectionClient;
 use Doctrine\ORM\EntityManagerInterface;

@@ -1,6 +1,6 @@
 <?php
 
-namespace ACSEO\TypesenseBundle\Manager;
+namespace ACSEO\TypesenseBundle\Finder;
 
 class TypesenseResponse
 {

@@ -113,7 +113,7 @@ services:
 // src/Controller/BookController.php
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use ACSEO\TypesenseBundle\Manager\TypesenseQuery;
+use ACSEO\TypesenseBundle\Finder\TypesenseQuery;
 
 //
 class BookController extends AbstractController
@@ -174,7 +174,7 @@ You can create more complex queries using all the possible Typsense [search argu
 ```
 <?php
 
-use ACSEO\TypesenseBundle\Manager\TypesenseQuery;
+use ACSEO\TypesenseBundle\Finder\TypesenseQuery;
 
 $simpleQuery = new TypesenseQuery('search term', 'collection field to search in');
 

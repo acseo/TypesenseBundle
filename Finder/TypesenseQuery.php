@@ -1,6 +1,6 @@
 <?php
 
-namespace ACSEO\TypesenseBundle\Manager;
+namespace ACSEO\TypesenseBundle\Finder;
 
 class TypesenseQuery
 {
@@ -75,6 +75,7 @@ class TypesenseQuery
 
     private function addParameter($key, $value)
     {
-        return $this->searchParameters[$key] = $value;
+        $this->searchParameters[$key] = $value;
+        return $this;
     }
 }

@@ -14,7 +14,7 @@
         </service>
 
         <!-- Abstract definition for all finders. -->
-        <service id="typesense.finder" class="ACSEO\TypesenseBundle\Manager\CollectionFinder" public="true" abstract="true">
+        <service id="typesense.finder" class="ACSEO\TypesenseBundle\Finder\CollectionFinder" public="true" abstract="true">
             <argument type="service" id="typesense.collection_client" />
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument /> <!-- collection name -->
