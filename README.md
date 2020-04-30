@@ -53,18 +53,29 @@ acseo_typesense:
             fields: 
                 id:                                # Entity attribute name
                     name: id                       # Typesense attribute name
-                    type: primary                  # attribute type
+                    type: primary                  # Attribute type
                 title: 
                     name: title
                     type: string
                 author:
-                     name : author
-                     type: string
+                     name: author
+                     type: object                  # Object conversion with __toString()
+                author.country:
+                    name : author_country          # equivalent of $book->getAuthor()->getCountry()
+                    type: string
+                genres:
+                    name : genres
+                    type: collection               # Convert ArrayCollection to array of strings
                 publishedAt: 
                     name : published_at
                     type: datetime
             default_sorting_field: published_at    # Default sorting field
 ```
+
+You can use basic types supported by Typesense for your fields : string, int32, etc.
+You can also use specific type names, such as : primary, collection, object
+
+Data conversion from Doctrine entity to Typesense data is managed by `ACSEO\TypesenseBundle\Transformer\DoctrineToTypesenseTransformer`
 
 ## Usage
 

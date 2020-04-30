@@ -15,7 +15,7 @@ class TypesenseResponse
 
     public function __construct(array $result)
     {
-        $this->facetCounts = $result['facet_counts'];
+        $this->facetCounts = isset($result['facet_counts']) ? $result['facet_counts'] : null;
         $this->found = $result['found'];
         $this->hits = $result['hits'];
         $this->page = $result['page'];

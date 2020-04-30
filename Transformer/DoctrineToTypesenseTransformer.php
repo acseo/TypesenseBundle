@@ -17,7 +17,12 @@ class DoctrineToTypesenseTransformer
             
             $this->methodCalls[$collectionDefinition['entity']] = [];
             foreach ($collectionDefinition['fields'] as $entityAttribute => $definition) {
-                $this->methodCalls[$collectionDefinition['entity']][$definition['name']] = ['entityAttribute' => $entityAttribute, 'entityMethod' => 'get'.ucfirst($entityAttribute)];
+                $entityAttributeChain = explode('.', $entityAttribute);
+                $methods = [];
+                foreach ($entityAttributeChain as $chainableCall) {
+                    $methods[] = 'get'.ucfirst($chainableCall);
+                }
+                $this->methodCalls[$collectionDefinition['entity']][$definition['name']] = ['entityAttribute' => $entityAttribute, 'entityMethods' => $methods];
             }
         }
     }
@@ -31,11 +36,17 @@ class DoctrineToTypesenseTransformer
 
         $data = [];
         $methodCalls = $this->methodCalls[$entityClass];
+
         foreach ($methodCalls as $typesenseField => $callableInfos) {
+            $entityMethods = $callableInfos['entityMethods'];
+            $value = $entity;
+            foreach ($entityMethods as $method) {
+                $value = $value->{$method}();
+            }
             $data[$typesenseField] = $this->castValue(
                 $entityClass,
                 $callableInfos['entityAttribute'],
-                $entity->{$callableInfos['entityMethod']}()
+                $value
             );
         }
 
@@ -53,6 +64,12 @@ class DoctrineToTypesenseTransformer
                     return $value->getTimestamp();
                 case 'primary'.'string':
                     return (string) $value;
+                case 'object'.'string':
+                    return $value->__toString();
+                case 'collection'.'string[]':
+                    return $value->map(function ($v) {
+                        return $v->__toString();
+                    })->toArray();
                 break;
             }
         }
@@ -61,10 +78,16 @@ class DoctrineToTypesenseTransformer
 
     private function castType($type)
     {
+        if ($type == 'collection') {
+            return 'string[]';
+        }
         if ($type == 'datetime') {
             return 'int32';
         }
         if ($type == 'primary') {
+            return 'string';
+        }
+        if ($type == 'object') {
             return 'string';
         }
 
