@@ -73,6 +73,9 @@ class CollectionManager
         if ($type == 'primary') {
             return 'int32';
         }
+        if ($type == 'object') {
+            return 'string';
+        }
 
         return $type;
     }
