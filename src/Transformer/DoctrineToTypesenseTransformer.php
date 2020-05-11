@@ -58,22 +58,26 @@ class DoctrineToTypesenseTransformer
         $collection = $this->entityToCollectionMapping[$entityClass];
         $originalType = $this->collectionDefinitions[$collection]['fields'][$name]['type'];
         $castedType = $this->castType($originalType);
-        if ($originalType != $castedType) {
-            switch ($originalType.$castedType) {
-                case 'datetime'.'int32':
+        switch ($originalType.$castedType) {
+            case 'datetime'.'int32':
+                if ($value instanceof \DateTime) {
                     return $value->getTimestamp();
-                case 'primary'.'int32':
-                    return (int) $value;
-                case 'object'.'string':
-                    return $value->__toString();
-                case 'collection'.'string[]':
-                    return $value->map(function ($v) {
-                        return $v->__toString();
-                    })->toArray();
-                break;
-            }
+                }
+                return null;
+            case 'primary'.'int32':
+                return (int) $value;
+            case 'object'.'string':
+                return $value->__toString();
+            case 'collection'.'string[]':
+                return $value->map(function ($v) {
+                    return $v->__toString();
+                })->toArray();
+            case 'string'.'string':
+                return (string) $value;
+            default:
+                return $value;
+            break;
         }
-        return $value;
     }
 
     private function castType($type)
