@@ -45,7 +45,7 @@ acseo_typesense:
     # Typesense host settings
     typesense:
         host: '%env(resolve:TYPESENSE_URL)%'
-        key: '%env(resolve:TYPESENSE_URL)%'
+        key: '%env(resolve:DATABASE_KEY)%'
     # Collection settings
     collections:
         books:                                     # Typesense collection name
