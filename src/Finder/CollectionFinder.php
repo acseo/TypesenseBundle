@@ -37,7 +37,7 @@ class CollectionFinder
         foreach ($results->getResults() as $result) {
             $ids[] = $result['document'][$primaryKeyInfos['documentAttribute']];
         }
-        $hydratedResults = $this->em->getRepository('App\Entity\Book')->findBy([$primaryKeyInfos['entityAttribute'] => $ids]);
+        $hydratedResults = $this->em->getRepository($this->collectionConfig['entity'])->findBy([$primaryKeyInfos['entityAttribute'] => $ids]);
         $results->setHydratedHits($hydratedResults);
         $results->setHydrated(true);
 
