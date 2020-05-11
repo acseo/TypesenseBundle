@@ -2,11 +2,12 @@
 
 namespace ACSEO\TypesenseBundle\Transformer;
 
-class DoctrineToTypesenseTransformer
+class DoctrineToTypesenseTransformer extends AbstractTransformer
 {
     private $collectionDefinitions;
     private $entityToCollectionMapping;
     private $methodCalls;
+
     public function __construct(array $collectionDefinitions)
     {
         $this->collectionDefinitions = $collectionDefinitions;
@@ -53,48 +54,30 @@ class DoctrineToTypesenseTransformer
         return $data;
     }
 
-    private function castValue($entityClass, $name, $value)
+    public function castValue($entityClass, $name, $value)
     {
         $collection = $this->entityToCollectionMapping[$entityClass];
         $originalType = $this->collectionDefinitions[$collection]['fields'][$name]['type'];
         $castedType = $this->castType($originalType);
         switch ($originalType.$castedType) {
-            case 'datetime'.'int32':
+            case self::TYPE_DATETIME.self::TYPE_INT_32:
                 if ($value instanceof \DateTime) {
                     return $value->getTimestamp();
                 }
                 return null;
-            case 'primary'.'int32':
+            case self::TYPE_PRIMARY.self::TYPE_INT_32:
                 return (int) $value;
-            case 'object'.'string':
+            case self::TYPE_OBJECT.self::TYPE_STRING:
                 return $value->__toString();
-            case 'collection'.'string[]':
+            case self::TYPE_COLLECTION.self::TYPE_ARRAY_STRING:
                 return $value->map(function ($v) {
                     return $v->__toString();
                 })->toArray();
-            case 'string'.'string':
+            case self::TYPE_STRING.self::TYPE_STRING:
                 return (string) $value;
             default:
                 return $value;
             break;
         }
-    }
-
-    private function castType($type)
-    {
-        if ($type == 'collection') {
-            return 'string[]';
-        }
-        if ($type == 'datetime') {
-            return 'int32';
-        }
-        if ($type == 'primary') {
-            return 'int32';
-        }
-        if ($type == 'object') {
-            return 'string';
-        }
-
-        return $type;
     }
 }

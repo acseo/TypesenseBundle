@@ -8,7 +8,6 @@ use PHPUnit\Framework\TestCase;
 
 class TypesenseResponseTest extends TestCase
 {
-
     private function constructResponse()
     {
         $result = [];

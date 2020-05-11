@@ -7,13 +7,12 @@ use PHPUnit\Framework\TestCase;
 
 class TypesenseQueryTest extends TestCase
 {
-
     public function testSimpleQuery()
     {
         $query = new TypesenseQuery('search term', 'search field');
 
         $this->assertEquals(
-            ['q' => 'search term', 'query_by' => 'search field'], 
+            ['q' => 'search term', 'query_by' => 'search field'],
             $query->getParameters()
         );
     }
@@ -36,7 +35,7 @@ class TypesenseQueryTest extends TestCase
         
         $this->assertEquals(
             [
-                'q' => 'search term', 
+                'q' => 'search term',
                 'query_by' => 'search field',
                 'prefix' => false,
                 'filter_by' => 'filter term',
@@ -49,7 +48,7 @@ class TypesenseQueryTest extends TestCase
                 'include_fields' =>'field1,field2',
                 'exclude_fields' => 'field3,field4',
                 'drop_tokens_threshold' => 0
-            ], 
+            ],
             $query->getParameters()
         );
     }

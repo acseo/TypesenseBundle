@@ -41,9 +41,11 @@ class TypesenseClient
                 'X-TYPESENSE-API-KEY' => $this->apiKey
             ]
         ]);
+
         if ($response->getStatusCode() >= 200 && $response->getStatusCode() < 300) {
             return json_decode($response->getContent(), true);
         }
+
         throw new TypesenseException($response);
     }
 }

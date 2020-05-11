@@ -56,7 +56,7 @@ class CollectionFinder
 
     private function getPrimaryKeyInfo()
     {
-        foreach($this->collectionConfig['fields'] as $name => $config) {
+        foreach ($this->collectionConfig['fields'] as $name => $config) {
             if ($config['type'] == 'primary') {
                 return ['entityAttribute' => $name, 'documentAttribute' => $config['name']];
             }

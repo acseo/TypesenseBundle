@@ -3,16 +3,19 @@
 namespace ACSEO\TypesenseBundle\Manager;
 
 use ACSEO\TypesenseBundle\Client\CollectionClient;
+use ACSEO\TypesenseBundle\Transformer\AbstractTransformer;
 
 class CollectionManager
 {
     private $collectionDefinitions;
     private $collectionClient;
+    private $transformer;
 
-    public function __construct(CollectionClient $collectionClient, array $collectionDefinitions)
+    public function __construct(CollectionClient $collectionClient, AbstractTransformer $transformer, array $collectionDefinitions)
     {
         $this->collectionDefinitions = $collectionDefinitions;
         $this->collectionClient = $collectionClient;
+        $this->transformer = $transformer;
     }
 
     public function getCollectionDefinitions()
@@ -54,7 +57,7 @@ class CollectionManager
         $fieldDefinitions = $definition['fields'];
         $fields = [];
         foreach ($fieldDefinitions as $key => $fieldDefinition) {
-            $fieldDefinition['type'] = $this->castType($fieldDefinition['type']);
+            $fieldDefinition['type'] = $this->transformer->castType($fieldDefinition['type']);
             $fields[] = $fieldDefinition;
         }
 
@@ -63,20 +66,5 @@ class CollectionManager
             $fields,
             $definition['default_sorting_field']
         );
-    }
-
-    private function castType($type)
-    {
-        if ($type == 'datetime') {
-            return 'int32';
-        }
-        if ($type == 'primary') {
-            return 'int32';
-        }
-        if ($type == 'object') {
-            return 'string';
-        }
-
-        return $type;
     }
 }

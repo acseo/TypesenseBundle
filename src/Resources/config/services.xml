@@ -28,6 +28,7 @@
         <!-- typesense collection manager -->
         <service id="typesense.collection_manager" class="ACSEO\TypesenseBundle\Manager\CollectionManager" public="true">
             <argument type="service" id="typesense.collection_client" />
+            <argument type="service" id="typesense.transformer.doctrine_to_typesense" />
             <argument /> <!-- collections -->
         </service>        
 

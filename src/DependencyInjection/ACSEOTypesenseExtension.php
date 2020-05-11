@@ -79,8 +79,7 @@ class ACSEOTypesenseExtension extends Extension
 
             $primaryKeyExists = false;
             
-            foreach($config['fields'] as $fieldConfig)
-            {
+            foreach ($config['fields'] as $fieldConfig) {
                 if ($fieldConfig['type'] == 'primary') {
                     $primaryKeyExists = true;
                     break;
@@ -111,7 +110,7 @@ class ACSEOTypesenseExtension extends Extension
     private function loadCollectionManager(ContainerBuilder $container)
     {
         $managerDef = $container->getDefinition('typesense.collection_manager');
-        $managerDef->replaceArgument(1, $this->collectionsConfig);
+        $managerDef->replaceArgument(2, $this->collectionsConfig);
     }
 
     /**
