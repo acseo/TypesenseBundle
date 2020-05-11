@@ -12,7 +12,7 @@ Features include:
 
 ## Installation
 
-Install the bundle usign composer 
+Install the bundle using composer 
 
 ```bash
 composer require acseo/typesense-bundle
