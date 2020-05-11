@@ -73,6 +73,11 @@ class DoctrineToTypesenseTransformer
                 break;
             }
         }
+        
+        if ('string' == $originalType && null == $value) {
+            return '';
+        }
+        
         return $value;
     }
 
