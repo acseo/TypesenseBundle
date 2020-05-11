@@ -36,7 +36,7 @@ Configure the Bundle
 ```
 # .env
 TYPESENSE_URL=localhost:8108
-DATABASE_KEY=123
+TYPESENSE_KEY=123
 ```
 
 ```
@@ -45,7 +45,7 @@ acseo_typesense:
     # Typesense host settings
     typesense:
         host: '%env(resolve:TYPESENSE_URL)%'
-        key: '%env(resolve:DATABASE_KEY)%'
+        key: '%env(resolve:TYPESENSE_KEY)%'
     # Collection settings
     collections:
         books:                                     # Typesense collection name
