@@ -4,6 +4,7 @@ namespace ACSEO\TypesenseBundle\Finder;
 
 use ACSEO\TypesenseBundle\Client\CollectionClient;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Query\ResultSetMappingBuilder;
 
 class CollectionFinder
 {
@@ -37,7 +38,10 @@ class CollectionFinder
         foreach ($results->getResults() as $result) {
             $ids[] = $result['document'][$primaryKeyInfos['documentAttribute']];
         }
-        $hydratedResults = $this->em->getRepository($this->collectionConfig['entity'])->findBy([$primaryKeyInfos['entityAttribute'] => $ids]);
+        $rsm = new ResultSetMappingBuilder($this->em);
+        $rsm->addRootEntityFromClassMetadata($this->collectionConfig['entity'], 'e');
+        $query = $this->em->createNativeQuery('SELECT * FROM client WHERE id IN ('.implode(', ', $ids).') ORDER BY FIELD(id,'.implode(', ', $ids).')', $rsm);
+        $hydratedResults = $query->getResult();
         $results->setHydratedHits($hydratedResults);
         $results->setHydrated(true);
 
