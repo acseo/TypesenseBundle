@@ -40,7 +40,8 @@ class CollectionFinder
         }
         $rsm = new ResultSetMappingBuilder($this->em);
         $rsm->addRootEntityFromClassMetadata($this->collectionConfig['entity'], 'e');
-        $query = $this->em->createNativeQuery('SELECT * FROM client WHERE id IN ('.implode(', ', $ids).') ORDER BY FIELD(id,'.implode(', ', $ids).')', $rsm);
+        $tableName = $this->em->getClassMetadata($this->collectionConfig['entity'])->getTableName();
+        $query = $this->em->createNativeQuery('SELECT * FROM '.$tableName.' WHERE id IN ('.implode(', ', $ids).') ORDER BY FIELD(id,'.implode(', ', $ids).')', $rsm);
         $hydratedResults = $query->getResult();
         $results->setHydratedHits($hydratedResults);
         $results->setHydrated(true);
