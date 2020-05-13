@@ -15,7 +15,7 @@ class DoctrineToTypesenseTransformer extends AbstractTransformer
         $this->entityToCollectionMapping = [];
         foreach ($this->collectionDefinitions as $collection => $collectionDefinition) {
             $this->entityToCollectionMapping[$collectionDefinition['entity']] = $collection;
-            
+
             $this->methodCalls[$collectionDefinition['entity']] = [];
             foreach ($collectionDefinition['fields'] as $entityAttribute => $definition) {
                 $entityAttributeChain = explode('.', $entityAttribute);
@@ -51,6 +51,22 @@ class DoctrineToTypesenseTransformer extends AbstractTransformer
             );
         }
 
+        // we get the primary key, and cast the value to string like typesense can use it as an id
+        $collection = $this->entityToCollectionMapping[$entityClass];
+        foreach ($this->collectionDefinitions[$collection]['fields'] as $value) {
+            if (self::TYPE_PRIMARY == $value['type']) {
+                $entityMethods = $methodCalls[$value['name']]['entityMethods'];
+                $value = $entity;
+                foreach ($entityMethods as $method) {
+                    $value = (string) $value->{$method}();
+                }
+
+                break;
+            }
+        }
+
+        $data['id'] = $value;
+
         return $data;
     }
 
@@ -64,6 +80,7 @@ class DoctrineToTypesenseTransformer extends AbstractTransformer
                 if ($value instanceof \DateTime) {
                     return $value->getTimestamp();
                 }
+
                 return null;
             case self::TYPE_PRIMARY.self::TYPE_INT_32:
                 return (int) $value;
@@ -77,6 +94,7 @@ class DoctrineToTypesenseTransformer extends AbstractTransformer
                 return (string) $value;
             default:
                 return $value;
+
             break;
         }
     }

@@ -22,7 +22,7 @@ class CollectionManager
     {
         return $this->collectionDefinitions;
     }
-    
+
     public function getManagedClassNames()
     {
         $managedClassNames = [];
@@ -56,6 +56,11 @@ class CollectionManager
         $definition = $this->collectionDefinitions[$collectionDefinitionName];
         $fieldDefinitions = $definition['fields'];
         $fields = [];
+        $fields[] = [
+            'name' => 'id',
+            'type' => 'string',
+        ];
+
         foreach ($fieldDefinitions as $key => $fieldDefinition) {
             $fieldDefinition['type'] = $this->transformer->castType($fieldDefinition['type']);
             $fields[] = $fieldDefinition;
