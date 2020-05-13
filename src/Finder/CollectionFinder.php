@@ -38,10 +38,16 @@ class CollectionFinder
         foreach ($results->getResults() as $result) {
             $ids[] = $result['document'][$primaryKeyInfos['documentAttribute']];
         }
+        if (empty($ids)) {
+            $results->setHydratedHits([]);
+            $results->setHydrated(true);
+
+            return $results;
+        }
         $rsm = new ResultSetMappingBuilder($this->em);
         $rsm->addRootEntityFromClassMetadata($this->collectionConfig['entity'], 'e');
         $tableName = $this->em->getClassMetadata($this->collectionConfig['entity'])->getTableName();
-        $query = $this->em->createNativeQuery('SELECT * FROM '.$tableName.' WHERE id IN ('.implode(', ', $ids).') ORDER BY FIELD(id,'.implode(', ', $ids).')', $rsm);
+        $query = $this->em->createNativeQuery('SELECT * FROM '.$tableName.' WHERE '.$primaryKeyInfos['entityAttribute'].' IN ('.implode(', ', $ids).') ORDER BY FIELD('.$primaryKeyInfos['entityAttribute'].','.implode(', ', $ids).')', $rsm);
         $hydratedResults = $query->getResult();
         $results->setHydratedHits($hydratedResults);
         $results->setHydrated(true);
