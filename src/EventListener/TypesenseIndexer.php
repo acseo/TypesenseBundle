@@ -46,8 +46,15 @@ class TypesenseIndexer
             return;
         }
 
+        $collectionDefinitionKey = array_search($entityClassname, $this->managedClassNames);
+        $collectionConfig = $this->collectionManager->getCollectionDefinitions()[$collectionDefinitionKey];
+
+
+        $primaryKey = $this->getPrimaryKeyInfo($collectionConfig);
+
         $collection = array_search($entityClassname, $this->managedClassNames);
         $data = $this->transformer->convert($entity);
+   
         $this->documentManager->delete($collection, $data['id']);
         $this->documentManager->index($collection, $data);
     }
@@ -65,6 +72,18 @@ class TypesenseIndexer
 
         $collection = array_search($entityClassname, $this->managedClassNames);
         $data = $this->transformer->convert($entity);
+
         $this->documentManager->delete($collection, $data['id']);
+    }
+
+
+    private function getPrimaryKeyInfo($collectionConfig)
+    {
+        foreach ($collectionConfig['fields'] as $name => $config) {
+            if ($config['type'] == 'primary') {
+                return ['entityAttribute' => $name, 'documentAttribute' => $config['name']];
+            }
+        }
+        throw new \Exception(sprintf('Primary key info have not been found for Typesense collection %s', $collectionConfig['typesense_name']));
     }
 }

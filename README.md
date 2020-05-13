@@ -51,9 +51,19 @@ acseo_typesense:
         books:                                     # Typesense collection name
             entity: 'App\Entity\Book'              # Doctrine Entity class
             fields: 
+                #
+                # Keeping Database and Typesense synchronized with ids
+                #
                 id:                                # Entity attribute name
-                    name: entity_id                # Typesense attribute name
+                    name: id                       # Typesense attribute name
                     type: primary                  # Attribute type
+                #
+                # Using again id as a sortable field (int32 required)
+                #
+                sortable_id:
+                    entity_attribute: id           # Entity attribute name forced
+                    name: entity_id
+                    type: int32
                 title: 
                     name: title
                     type: string
@@ -69,7 +79,7 @@ acseo_typesense:
                 publishedAt: 
                     name : published_at
                     type: datetime
-            default_sorting_field: published_at    # Default sorting field. Must be primary, int32 or float
+            default_sorting_field: sortable_id    # Default sorting field. Must be int32 or float
 ```
 
 You can use basic types supported by Typesense for your fields : string, int32, float, etc.

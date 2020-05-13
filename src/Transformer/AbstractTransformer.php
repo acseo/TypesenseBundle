@@ -46,7 +46,7 @@ abstract class AbstractTransformer
             return self::TYPE_INT_32;
         }
         if ($type == self::TYPE_PRIMARY) {
-            return self::TYPE_INT_32;
+            return self::TYPE_STRING;
         }
         if ($type == self::TYPE_OBJECT) {
             return self::TYPE_STRING;

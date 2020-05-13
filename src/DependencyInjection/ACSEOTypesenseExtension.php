@@ -79,12 +79,15 @@ class ACSEOTypesenseExtension extends Extension
 
             $primaryKeyExists = false;
             
-            foreach ($config['fields'] as $fieldConfig) {
+            foreach ($config['fields'] as $key => $fieldConfig) {
                 if ($fieldConfig['type'] == 'primary') {
                     $primaryKeyExists = true;
-                    break;
+                }
+                if (!isset($fieldConfig['entity_attribute'])){
+                    $config['fields'][$key]['entity_attribute'] = $key;
                 }
             }
+
             if (!$primaryKeyExists) {
                 $config['fields']['id'] = [
                     'name' => 'entity_id',

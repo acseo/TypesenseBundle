@@ -4,6 +4,7 @@ namespace ACSEO\TypesenseBundle\Finder;
 
 use ACSEO\TypesenseBundle\Client\CollectionClient;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Query\ResultSetMappingBuilder;
 
 class CollectionFinder
 {
@@ -22,8 +23,7 @@ class CollectionFinder
     {
         return $this->search($query);
     }
-
-        
+   
     public function query(TypesenseQuery $query)
     {
         $results = $this->search($query);
@@ -37,7 +37,15 @@ class CollectionFinder
         foreach ($results->getResults() as $result) {
             $ids[] = $result['document'][$primaryKeyInfos['documentAttribute']];
         }
-        $hydratedResults = $this->em->getRepository($this->collectionConfig['entity'])->findBy([$primaryKeyInfos['entityAttribute'] => $ids]);
+
+        $hydratedResults = [];
+        if (count($ids)) {
+            $rsm = new ResultSetMappingBuilder($this->em);
+            $rsm->addRootEntityFromClassMetadata($this->collectionConfig['entity'], 'e');
+            $tableName = $this->em->getClassMetadata($this->collectionConfig['entity'])->getTableName();
+            $query = $this->em->createNativeQuery('SELECT * FROM '.$tableName.' WHERE '.$primaryKeyInfos['entityAttribute'].' IN ('.implode(', ', $ids).') ORDER BY FIELD(id,'.implode(', ', $ids).')', $rsm);
+            $hydratedResults = $query->getResult();
+        }
         $results->setHydratedHits($hydratedResults);
         $results->setHydrated(true);
 
@@ -58,7 +66,7 @@ class CollectionFinder
     {
         foreach ($this->collectionConfig['fields'] as $name => $config) {
             if ($config['type'] == 'primary') {
-                return ['entityAttribute' => $name, 'documentAttribute' => $config['name']];
+                return ['entityAttribute' => $config['entity_attribute'], 'documentAttribute' => $config['name']];
             }
         }
         throw new \Exception(sprintf('Primary key info have not been found for Typesense collection %s', $this->collectionConfig['typesense_name']));
