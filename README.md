@@ -62,7 +62,7 @@ acseo_typesense:
                 #
                 sortable_id:
                     entity_attribute: id           # Entity attribute name forced
-                    name: entity_id
+                    name: sortable_id
                     type: int32
                 title: 
                     name: title
@@ -190,7 +190,7 @@ $simpleQuery = new TypesenseQuery('search term', 'collection field to search in'
 
 $complexQuery = new TypesenseQuery('search term', 'collection field to search in')
                       ->filterBy('theme: [adventure, thriller]')
-                      ->sortBy('year:desc')
+                      ->sortBy('year:desc');
 ```
 
 ### Doctrine Listeners
