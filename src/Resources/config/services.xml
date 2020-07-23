@@ -62,6 +62,14 @@
             <argument type="service" id="typesense.collection_manager" />
             <argument type="service" id="typesense.document_manager" />
             <argument type="service" id="typesense.transformer.doctrine_to_typesense" />
+        </service>   
+
+        <service id="typesense.command.import" class="ACSEO\TypesenseBundle\Command\ImportCommand" public="true">
+            <tag name="console.command" />
+            <argument type="service" id="doctrine.orm.entity_manager" />
+            <argument type="service" id="typesense.collection_manager" />
+            <argument type="service" id="typesense.document_manager" />
+            <argument type="service" id="typesense.transformer.doctrine_to_typesense" />
         </service>               
     </services>
 </container>

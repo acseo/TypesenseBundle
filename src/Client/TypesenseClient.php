@@ -2,8 +2,8 @@
 
 namespace ACSEO\TypesenseBundle\Client;
 
-use Symfony\Contracts\HttpClient\HttpClientInterface;
 use ACSEO\TypesenseBundle\Exception\TypesenseException;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class TypesenseClient
 {
@@ -20,32 +20,53 @@ class TypesenseClient
 
     public function get(string $endpoint): array
     {
-        return $this->api($endpoint, [], 'GET');
+        return $this->api($endpoint, '', 'GET');
     }
 
-    public function post(string $endpoint, array $data = []): array
+    public function post(string $endpoint, array $data = [], bool $import = false): array
     {
+        if ($import) {
+            /**
+             * @author raphaelstolt in json-lines package
+             */
+            $lines = [];
+            foreach ($data as $line) {
+                $lines[] = json_encode($line, JSON_UNESCAPED_UNICODE);
+            }
+
+            $data = implode("\n", $lines)
+            ."\n";
+        } else {
+            $data = json_encode($data);
+        }
+
         return $this->api($endpoint, $data, 'POST');
     }
 
     public function delete(string $endpoint, array $data = []): array
     {
+        $data = json_encode($data);
+
         return $this->api($endpoint, $data, 'DELETE');
     }
 
-    private function api(string $endpoint, array $data = [], string $method = 'POST'): array
+    private function api(string $endpoint, string $data = '', string $method = 'POST'): array
     {
-        $response = $this->client->request($method, "http://{$this->host}/{$endpoint}", [
-            'json'    => $data,
-            'headers' => [
-                'X-TYPESENSE-API-KEY' => $this->apiKey
-            ]
-        ]);
+        if ('null' != $this->host) {
+            $response = $this->client->request($method, "http://{$this->host}/{$endpoint}", [
+                'body' => $data,
+                'headers' => [
+                    'X-TYPESENSE-API-KEY' => $this->apiKey,
+                ],
+            ]);
 
-        if ($response->getStatusCode() >= 200 && $response->getStatusCode() < 300) {
-            return json_decode($response->getContent(), true);
+            if ($response->getStatusCode() >= 200 && $response->getStatusCode() < 300) {
+                return json_decode($response->getContent(), true);
+            }
+
+            throw new TypesenseException($response);
         }
 
-        throw new TypesenseException($response);
+        return [];
     }
 }
