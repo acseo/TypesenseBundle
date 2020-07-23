@@ -36,20 +36,20 @@ class TypesenseClient
     private function api(string $endpoint, array $data = [], string $method = 'POST'): array
     {
         if ('null' != $this->host) {
-            $response = $this->client->request($method, "http://{$this->host}/{$endpoint}", [
-                'json' => $data,
-                'headers' => [
-                    'X-TYPESENSE-API-KEY' => $this->apiKey,
-                ],
-            ]);
-
-            if ($response->getStatusCode() >= 200 && $response->getStatusCode() < 300) {
-                return json_decode($response->getContent(), true);
-            }
-
-            throw new TypesenseException($response);
+            return  [];
         }
 
-        return  [];
+        $response = $this->client->request($method, "http://{$this->host}/{$endpoint}", [
+            'json' => $data,
+            'headers' => [
+                'X-TYPESENSE-API-KEY' => $this->apiKey,
+            ],
+        ]);
+
+        if ($response->getStatusCode() >= 200 && $response->getStatusCode() < 300) {
+            return json_decode($response->getContent(), true);
+        }
+
+        throw new TypesenseException($response);
     }
 }
