@@ -35,7 +35,7 @@ class TypesenseClient
 
     private function api(string $endpoint, array $data = [], string $method = 'POST'): array
     {
-        if ('null' != $this->host) {
+        if ('null' === $this->host) {
             return  [];
         }
 
