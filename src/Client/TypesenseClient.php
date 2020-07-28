@@ -2,8 +2,8 @@
 
 namespace ACSEO\TypesenseBundle\Client;
 
-use Symfony\Contracts\HttpClient\HttpClientInterface;
 use ACSEO\TypesenseBundle\Exception\TypesenseException;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class TypesenseClient
 {
@@ -35,11 +35,15 @@ class TypesenseClient
 
     private function api(string $endpoint, array $data = [], string $method = 'POST'): array
     {
+        if ('null' === $this->host) {
+            return  [];
+        }
+
         $response = $this->client->request($method, "http://{$this->host}/{$endpoint}", [
-            'json'    => $data,
+            'json' => $data,
             'headers' => [
-                'X-TYPESENSE-API-KEY' => $this->apiKey
-            ]
+                'X-TYPESENSE-API-KEY' => $this->apiKey,
+            ],
         ]);
 
         if ($response->getStatusCode() >= 200 && $response->getStatusCode() < 300) {
