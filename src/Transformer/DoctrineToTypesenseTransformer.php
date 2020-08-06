@@ -15,7 +15,7 @@ class DoctrineToTypesenseTransformer extends AbstractTransformer
         $this->entityToCollectionMapping = [];
         foreach ($this->collectionDefinitions as $collection => $collectionDefinition) {
             $this->entityToCollectionMapping[$collectionDefinition['entity']] = $collection;
-            
+
             $this->methodCalls[$collectionDefinition['entity']] = [];
             foreach ($collectionDefinition['fields'] as $entityAttribute => $definition) {
                 $entityAttribute = $definition['entity_attribute'];
@@ -43,7 +43,9 @@ class DoctrineToTypesenseTransformer extends AbstractTransformer
             $entityMethods = $callableInfos['entityMethods'];
             $value = $entity;
             foreach ($entityMethods as $method) {
-                $value = $value->{$method}();
+                if (null != $value) {
+                    $value = $value->{$method}();
+                }
             }
             $data[$typesenseField] = $this->castValue(
                 $entityClass,
@@ -56,14 +58,14 @@ class DoctrineToTypesenseTransformer extends AbstractTransformer
     }
 
     public function castValue($entityClass, $name, $value)
-    {        
+    {
         $collection = $this->entityToCollectionMapping[$entityClass];
         $key = array_search($name, array_column(
-            $this->collectionDefinitions[$collection]['fields'], 
+            $this->collectionDefinitions[$collection]['fields'],
             'name'
         ));
         $collectionFieldsDefinitions = array_values($this->collectionDefinitions[$collection]['fields']);
-        
+
         $originalType = $collectionFieldsDefinitions[$key]['type'];
         $castedType = $this->castType($originalType);
 
@@ -72,6 +74,7 @@ class DoctrineToTypesenseTransformer extends AbstractTransformer
                 if ($value instanceof \DateTime) {
                     return $value->getTimestamp();
                 }
+
                 return null;
             case self::TYPE_PRIMARY.self::TYPE_STRING:
                 return (string) $value;
@@ -85,6 +88,7 @@ class DoctrineToTypesenseTransformer extends AbstractTransformer
                 return (string) $value;
             default:
                 return $value;
+
             break;
         }
     }
