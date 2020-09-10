@@ -179,7 +179,7 @@ The class `TypesenseQuery()` class takes 2 arguments :
 * The search terme (`q`)
 * The fields to search on (`queryBy`)
 
-You can create more complex queries using all the possible Typsense [search arguments](https://typesense.org/docs/0.11.2/api/#search-collection)
+You can create more complex queries using all the possible Typsense [search arguments](https://typesense.org/docs/0.14.0/api/#search-collection)
 
 ```
 <?php
@@ -190,6 +190,7 @@ $simpleQuery = new TypesenseQuery('search term', 'collection field to search in'
 
 $complexQuery = new TypesenseQuery('search term', 'collection field to search in')
                       ->filterBy('theme: [adventure, thriller]')
+                      ->addParameter('key', 'value')
                       ->sortBy('year:desc');
 ```
 
