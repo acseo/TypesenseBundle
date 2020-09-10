@@ -83,7 +83,7 @@ class ACSEOTypesenseExtension extends Extension
                 if ($fieldConfig['type'] == 'primary') {
                     $primaryKeyExists = true;
                 }
-                if (!isset($fieldConfig['entity_attribute'])){
+                if (!isset($fieldConfig['entity_attribute'])) {
                     $config['fields'][$key]['entity_attribute'] = $key;
                 }
             }

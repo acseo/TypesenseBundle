@@ -56,8 +56,8 @@ class PopulateCommand extends Command
 
             $q = $this->em->createQuery('select u from '.$collectionDefinition['entity']. ' u');
             $entities = $q->iterate();
-	        foreach ($entities as $entity) {
-    		    $data = $this->transformer->convert($entity[0]);
+            foreach ($entities as $entity) {
+                $data = $this->transformer->convert($entity[0]);
                 try {
                     $this->documentManager->delete($collectionName, $data['id']);
                 } catch (\Exception $e) {
