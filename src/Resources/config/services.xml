@@ -13,13 +13,22 @@
             <argument type="service" id="http_client" />
         </service>
 
-        <!-- Abstract definition for all finders. -->
+        <!-- Abstract definition for all generic finders. -->
         <service id="typesense.finder" class="ACSEO\TypesenseBundle\Finder\CollectionFinder" public="true" abstract="true">
             <argument type="service" id="typesense.collection_client" />
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument /> <!-- collection name -->
         </service>
 
+        <!-- Abstract definition for all specific finders. -->
+        <service id="typesense.specificfinder" class="ACSEO\TypesenseBundle\Finder\SpecificCollectionFinder" public="true" abstract="true">
+            <argument /> <!-- generic finder class -->
+            <argument /> <!-- finder arguments -->
+        </service>
+
+        <service id="typesense.autocomplete_controller" class="ACSEO\TypesenseBundle\Controller\TypesenseAutocompleteController" >
+            <argument /> <!-- routes -->
+        </service>
 
         <service id="typesense.collection_client" class="ACSEO\TypesenseBundle\Client\CollectionClient" public="true">
             <argument type="service" id="typesense.client" />

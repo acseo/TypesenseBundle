@@ -5,9 +5,12 @@ namespace ACSEO\TypesenseBundle\DependencyInjection;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\Extension;
 use ACSEO\TypesenseBundle\Client\CollectionManager;
+use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ChildDefinition;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
+use Symfony\Component\DependencyInjection\Reference;
+use Symfony\Component\Routing\RouterInterface;
 
 class ACSEOTypesenseExtension extends Extension
 {
@@ -18,6 +21,14 @@ class ACSEOTypesenseExtension extends Extension
      * @var array
      */
     private $collectionsConfig = [];
+
+    /**
+     * An array of finder as configured by the extension.
+     *
+     * @var array
+     */
+    private $findersConfig = [];
+
 
     public function load(array $configs, ContainerBuilder $container)
     {
@@ -39,9 +50,14 @@ class ACSEOTypesenseExtension extends Extension
         $this->loadClient($config['typesense'], $container);
         
         $this->loadCollections($config['collections'], $container);
+
         $this->loadCollectionManager($container);
         $this->loadCollectionsFinder($container);
+
+        $this->loadFinderServices($container);
+
         $this->loadTransformer($container);
+        $this->configureController($container);
     }
 
     /**
@@ -93,6 +109,18 @@ class ACSEOTypesenseExtension extends Extension
                     'name' => 'entity_id',
                     'type' => 'primary'
                 ];
+            }
+
+            if (isset($config['finders'])) {
+                foreach ($config['finders'] as $finderName => $finderConfig) {
+                    $finderName = $collectionName.'.'.$finderName;
+                    $finderConfig['collection_name'] = $collectionName;
+                    $finderConfig['finder_name'] = $finderName;
+                    if (!isset($finderConfig['finder_parameters']['query_by'])) {
+                        throw new \Exception('acseo_typesense.collections.'.$finderName.'.finder_parameters.query_by must be set');
+                    }
+                    $this->findersConfig[$finderName] = $finderConfig;
+                }
             }
 
             $this->collectionsConfig[$name] = [
@@ -147,5 +175,44 @@ class ACSEOTypesenseExtension extends Extension
         
             $container->setDefinition($finderId, $finderDef);
         }
+    }
+
+
+    /**
+     * Loads the configured Finder services.
+     *
+     * @param \Symfony\Component\DependencyInjection\ContainerBuilder $container
+     *
+     */
+    private function loadFinderServices(ContainerBuilder $container)
+    {
+        foreach ($this->findersConfig as $name => $config) {
+            $finderName = $config['finder_name'];
+            $collectionName = $config['collection_name'];
+            $finderId = sprintf('typesense.finder.%s', $collectionName);
+
+            if (isset($config['finder_service'])) {
+                $finderId = $config['finder_service'];
+            }
+
+            $specifiFinderId = sprintf('typesense.specificfinder.%s', $finderName);
+            $specifiFinderDef = new ChildDefinition('typesense.specificfinder');
+            $specifiFinderDef->replaceArgument(0, new Reference($finderId));
+            $specifiFinderDef->replaceArgument(1, $config['finder_parameters']);
+        
+            $container->setDefinition($specifiFinderId, $specifiFinderDef);
+        }
+    }
+
+    private function configureController(ContainerBuilder $container)
+    {
+        $finderServices = [];
+        foreach ($this->findersConfig as $name => $config) {
+            $finderName = $config['finder_name'];
+            $finderId = sprintf('typesense.specificfinder.%s', $finderName);
+            $autocompleteServices[$finderName] = new Reference($finderId);
+        }
+        $controllerDef = $container->getDefinition('typesense.autocomplete_controller');
+        $controllerDef->replaceArgument(0, $autocompleteServices);
     }
 }

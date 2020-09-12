@@ -6,7 +6,7 @@ use ACSEO\TypesenseBundle\Client\CollectionClient;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query\ResultSetMappingBuilder;
 
-class CollectionFinder
+class CollectionFinder implements CollectionFinderInterface
 {
     private $collectionConfig;
     private $collectionClient;
