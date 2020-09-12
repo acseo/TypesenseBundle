@@ -210,9 +210,9 @@ class ACSEOTypesenseExtension extends Extension
         foreach ($this->findersConfig as $name => $config) {
             $finderName = $config['finder_name'];
             $finderId = sprintf('typesense.specificfinder.%s', $finderName);
-            $autocompleteServices[$finderName] = new Reference($finderId);
+            $finderServices[$finderName] = new Reference($finderId);
         }
         $controllerDef = $container->getDefinition('typesense.autocomplete_controller');
-        $controllerDef->replaceArgument(0, $autocompleteServices);
+        $controllerDef->replaceArgument(0, $finderServices);
     }
 }
