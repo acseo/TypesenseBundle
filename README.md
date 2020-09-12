@@ -39,7 +39,7 @@ TYPESENSE_URL=localhost:8108
 TYPESENSE_KEY=123
 ```
 
-```
+```yaml
 # config/packages/acseo_typesense.yml
 acseo_typesense:
     # Typesense host settings
@@ -93,7 +93,7 @@ Data conversion from Doctrine entity to Typesense data is managed by `ACSEO\Type
 
 This bundle comes with useful commands in order to create and index your data
 
-```
+```yaml
 # Creation collections structure
 php bin/console typesense:create
 
@@ -103,13 +103,15 @@ php bin/console typesense:populate
 
 ### Search documents
 
-This bundle creates dynamic **finders** services that allows you to query Typesenses
+This bundle creates dynamic generic **finders** services that allows you to query Typesense
 
 The finder services are named like this  : typesense.finder.*collection_name*
 
-You can inject the finders in your Controllers or into other services
+You can inject the generic finder in your Controller or into other services. 
 
-```
+You can also create specific finder for a collection. See documentation below.
+
+```yaml
 # config/services.yaml
 services:
     App\Controller\BookController:
@@ -117,7 +119,7 @@ services:
             $bookFinder: '@typesense.finder.books'    
 ```
 
-```
+```php
 <?php
 
 // src/Controller/BookController.php
@@ -181,7 +183,7 @@ The class `TypesenseQuery()` class takes 2 arguments :
 
 You can create more complex queries using all the possible Typsense [search arguments](https://typesense.org/docs/0.14.0/api/#search-collection)
 
-```
+```php
 <?php
 
 use ACSEO\TypesenseBundle\Finder\TypesenseQuery;
@@ -194,6 +196,63 @@ $complexQuery = new TypesenseQuery('search term', 'collection field to search in
                       ->sortBy('year:desc');
 ```
 
+### Create specific finder for a collection
+
+You can easily create specific finders for each collection that you declare.
+
+```yaml
+# config/packages/acseo_typesense.yml
+acseo_typesense:
+    # ...
+    # Collection settings
+    collections:
+        books:                                       # Typesense collection name
+            # ...                                    # Colleciton fields definition
+            # ...
+            finders:                                 # Declare your specific finder
+                books_autocomplete:                  # Finder name
+                    finder_parameters:               # Parameters used by the finder
+                        query_by: title              #
+                        limit: 10                    # You can add as key / valuesspecifications
+                        prefix: true                 # based on Typesense Request 
+                        num_typos: 1                 #
+                        drop_tokens_threshold: 1     #
+```
+
+This configuration will create a service named `@typesense.finder.books.books_autocomplete`.  
+You can inject the specific finder in your Controller or into other services
+
+```yaml
+# config/services.yaml
+services:
+    App\Controller\BookController:
+        arguments:
+            $autocompleteBookFinder: '@typesense.finder.books.books_autocomplete'
+```
+
+and then use it like this :
+
+```php
+<?php
+// src/Controller/BookController.php
+
+class BookController extends AbstractController
+{
+    private $autocompleteBookFinder;
+
+    public function __construct($autocompleteBookFinder)
+    {
+        $this->autocompleteBookFinder = $autocompleteBookFinder;
+    }
+
+    public function autocomplete($term = '')
+    {
+        $results = $this->autocompleteBookFinder->search($term)->getResults();
+        // or if you want raw results
+        $rawResults = $this->autocompleteBookFinder->search($term)->getRawResults();
+    }
+```
+
 ### Doctrine Listeners
 
 Doctrine listeners will update Typesense with Entity data during the following events :
@@ -201,3 +260,10 @@ Doctrine listeners will update Typesense with Entity data during the following e
 * postPersist
 * postUpdate
 * preDelete
+
+
+### Cookbook 
+----------------
+
+* [Use Typesense to make an autocomplete field](doc/cookbook/autocomplete.md)
+
