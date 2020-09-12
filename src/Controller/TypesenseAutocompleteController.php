@@ -2,12 +2,11 @@
 
 namespace ACSEO\TypesenseBundle\Controller;
 
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
-class TypesenseAutocompleteController //extends AbstractController
+class TypesenseAutocompleteController
 {
     private $routesConfig;
 
