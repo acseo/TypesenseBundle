@@ -265,5 +265,5 @@ Doctrine listeners will update Typesense with Entity data during the following e
 ### Cookbook 
 ----------------
 
-* [Use Typesense to make an autocomplete field](cookbook/autocomplete.md)
+* [Use Typesense to make an autocomplete field](doc/cookbook/autocomplete.md)
 
