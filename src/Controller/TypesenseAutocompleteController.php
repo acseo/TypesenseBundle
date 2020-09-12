@@ -17,13 +17,13 @@ class TypesenseAutocompleteController //extends AbstractController
     }
     public function autocomplete(Request $request): JsonResponse
     {
-        $autocompleteName = $request->get('autocomplete_name', null);
+        $finderName = $request->get('finder_name', null);
         $q = $request->get('q', null);
-        if (!isset($this->routesConfig[$autocompleteName])) {
-            throw new NotFoundHttpException('no autocomplete found with the name : '.$autocompleteName);
+        if (!isset($this->routesConfig[$finderName])) {
+            throw new NotFoundHttpException('no autocomplete found with the name : '.$finderName);
         }
 
-        $results = $this->routesConfig[$autocompleteName]->search($q);
+        $results = $this->routesConfig[$finderName]->search($q);
 
         return new JsonResponse($results->getRawResults());
     }
