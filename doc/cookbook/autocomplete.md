@@ -54,7 +54,6 @@ The example bellow is based on [bootstrap-autocomplete](https://github.com/xcash
         <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
 
-
         {% block javascripts %}{% endblock %}
     </body>
 </html>
@@ -69,7 +68,7 @@ The example bellow is based on [bootstrap-autocomplete](https://github.com/xcash
 {% endblock %}
 
 {% block javascripts %}
- <script src="https://cdn.jsdelivr.net/gh/xcash/bootstrap-autocomplete@v2.3.7/dist/latest/bootstrap-autocomplete.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/xcash/bootstrap-autocomplete@v2.3.7/dist/latest/bootstrap-autocomplete.min.js"></script>
 <script type="text/javascript">
 
     $(document).ready(function(e) {
