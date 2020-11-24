@@ -71,15 +71,17 @@ acseo_typesense:
                      name: author
                      type: object                  # Object conversion with __toString()
                 author.country:
-                    name : author_country          # equivalent of $book->getAuthor()->getCountry()
+                    name: author_country           # Equivalent of $book->getAuthor()->getCountry()
                     type: string
+                    facet: true                    # Declare field as facet (required to use "group_by" query option)
                 genres:
-                    name : genres
+                    name: genres
                     type: collection               # Convert ArrayCollection to array of strings
                 publishedAt: 
-                    name : published_at
+                    name: published_at
                     type: datetime
-            default_sorting_field: sortable_id    # Default sorting field. Must be int32 or float
+                    optional: true                 # Declare field as optional
+            default_sorting_field: sortable_id     # Default sorting field. Must be int32 or float
 ```
 
 You can use basic types supported by Typesense for your fields : string, int32, float, etc.
