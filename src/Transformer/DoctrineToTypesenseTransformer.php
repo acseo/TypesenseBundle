@@ -70,13 +70,8 @@ class DoctrineToTypesenseTransformer extends AbstractTransformer
         $castedType = $this->castType($originalType);
 
         switch ($originalType.$castedType) {
-            case self::TYPE_DATETIME.self::TYPE_INT_32:
-                if ($value instanceof \DateTime) {
-                    return $value->getTimestamp();
-                }
-
-                return null;
             case self::TYPE_PRIMARY.self::TYPE_STRING:
+            case self::TYPE_STRING.self::TYPE_STRING:
                 return (string) $value;
             case self::TYPE_OBJECT.self::TYPE_STRING:
                 return $value->__toString();
@@ -84,12 +79,12 @@ class DoctrineToTypesenseTransformer extends AbstractTransformer
                 return $value->map(function ($v) {
                     return $v->__toString();
                 })->toArray();
-            case self::TYPE_STRING.self::TYPE_STRING:
-                return (string) $value;
             default:
-                return $value;
+                if ($value instanceof \DateTime) {
+                    return $value->getTimestamp();
+                }
 
-            break;
+                return $value;
         }
     }
 }
