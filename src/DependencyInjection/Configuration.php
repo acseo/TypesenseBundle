@@ -33,6 +33,8 @@ class Configuration implements ConfigurationInterface
                                             ->scalarNode('entity_attribute')->end()
                                             ->scalarNode('name')->end()
                                             ->scalarNode('type')->end()
+                                            ->booleanNode('facet')->end()
+                                            ->booleanNode('optional')->end()
                                         ->end()
                                     ->end()
                                 ->end()
