@@ -70,7 +70,7 @@ class DoctrineToTypesenseTransformer extends AbstractTransformer
         $castedType = $this->castType($originalType);
 
         switch ($originalType.$castedType) {
-            case self::TYPE_DATETIME.self::TYPE_INT_32:
+            case self::TYPE_DATETIME.self::TYPE_INT_64:
                 if ($value instanceof \DateTime) {
                     return $value->getTimestamp();
                 }
