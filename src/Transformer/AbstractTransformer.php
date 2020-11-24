@@ -43,7 +43,7 @@ abstract class AbstractTransformer
             return self::TYPE_ARRAY_STRING;
         }
         if ($type == self::TYPE_DATETIME) {
-            return self::TYPE_INT_32;
+            return self::TYPE_INT_64;
         }
         if ($type == self::TYPE_PRIMARY) {
             return self::TYPE_STRING;
