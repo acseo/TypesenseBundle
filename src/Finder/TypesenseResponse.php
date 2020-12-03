@@ -56,6 +56,13 @@ class TypesenseResponse
         return $this->page;
     }
   
+    /**
+     * Get total hits
+     */
+    public function getFound()
+    {
+        return $this->found;
+    }
 
     /**
      * Set the value of hydratedHits
