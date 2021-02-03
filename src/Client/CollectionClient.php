@@ -15,28 +15,27 @@ class CollectionClient
         $this->client = $client;
     }
 
-    public function get(string $endpoint): array
+    public function get(string $collectionName, array $queryParameters)
     {
-        return $this->client->get(sprintf('collections/%s', $endpoint));
+        return $this->client->collections[$collectionName]->documents->search($queryParameters);
     }
 
     public function list()
     {
-        return $this->client->get('collections');
+        return $this->client->collections->retrieve();
     }
 
     public function create($name, $fields, $defaultSortingField)
     {
-        $this->client->post("collections", [
-            "name" => $name,
-            "fields" => $fields,
-            "default_sorting_field" => $defaultSortingField
+        $this->client->collections->create([
+            'name' => $name,
+            'fields' => $fields,
+            'default_sorting_field' => $defaultSortingField
         ]);
     }
-
-
+    
     public function delete(string $name)
     {
-        return $this->client->delete('collections/'.$name);
+        return $this->client->collections[$name]->delete();
     }
 }
