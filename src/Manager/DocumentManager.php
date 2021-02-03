@@ -23,4 +23,9 @@ class DocumentManager
     {
         return $this->client->collections[$collection]->documents->create($data);
     }
+
+    public function import(string $collection, array $data)
+    {
+        return $this->client->collections[$collection]->documents->import($data);
+    }
 }
