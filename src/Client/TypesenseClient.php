@@ -4,52 +4,25 @@ namespace ACSEO\TypesenseBundle\Client;
 
 use ACSEO\TypesenseBundle\Exception\TypesenseException;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
+use Typesense\Client;
 
-class TypesenseClient
+class TypesenseClient extends Client
 {
-    private $host;
-    private $apiKey;
-    private $client;
-
-    public function __construct(string $host, string $apiKey, HttpClientInterface $client)
+    public function __construct(string $url, string $apiKey)
     {
-        $this->host = $host;
-        $this->apiKey = $apiKey;
-        $this->client = $client;
-    }
-
-    public function get(string $endpoint): array
-    {
-        return $this->api($endpoint, [], 'GET');
-    }
-
-    public function post(string $endpoint, array $data = []): array
-    {
-        return $this->api($endpoint, $data, 'POST');
-    }
-
-    public function delete(string $endpoint, array $data = []): array
-    {
-        return $this->api($endpoint, $data, 'DELETE');
-    }
-
-    private function api(string $endpoint, array $data = [], string $method = 'POST'): array
-    {
-        if ('null' === $this->host) {
-            return  [];
-        }
-
-        $response = $this->client->request($method, "http://{$this->host}/{$endpoint}", [
-            'json' => $data,
-            'headers' => [
-                'X-TYPESENSE-API-KEY' => $this->apiKey,
+        $urlParsed = parse_url($url);
+        
+        parent::__construct([
+            'nodes'        => [
+                [
+                    'host'     => $urlParsed['host'],
+                    'port'     => $urlParsed['port'],
+                    'protocol' => $urlParsed['scheme'],
+                ],
             ],
+            'api_key'      => $apiKey,
+            'connection_timeout_seconds' => 5,
         ]);
-
-        if ($response->getStatusCode() >= 200 && $response->getStatusCode() < 300) {
-            return json_decode($response->getContent(), true);
-        }
-
-        throw new TypesenseException($response);
     }
+
 }

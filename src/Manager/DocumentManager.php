@@ -3,6 +3,7 @@
 namespace ACSEO\TypesenseBundle\Manager;
 
 use ACSEO\TypesenseBundle\Client\TypesenseClient;
+use Typesense\Client;
 
 class DocumentManager
 {
@@ -15,11 +16,11 @@ class DocumentManager
 
     public function delete($collection, $id)
     {
-        return $this->client->delete(sprintf('collections/%s/documents/%d', $collection, $id));
+        return $this->client->collections[$collection]->documents[$id]->delete();
     }
     
     public function index($collection, $data)
     {
-        return $this->client->post(sprintf('collections/%s/documents', $collection), $data);
+        return $this->client->collections[$collection]->documents->create($data);
     }
 }

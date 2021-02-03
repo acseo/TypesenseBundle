@@ -54,10 +54,7 @@ class CollectionFinder implements CollectionFinderInterface
 
     private function search(TypesenseQuery $query)
     {
-        $result = $this->collectionClient->get(
-            sprintf('%s/documents/search?', $this->collectionConfig['typesense_name']) .
-            http_build_query($query->getParameters())
-        );
+        $result = $this->collectionClient->get($this->collectionConfig['typesense_name'], $query->getParameters());
 
         return new TypesenseResponse($result);
     }
