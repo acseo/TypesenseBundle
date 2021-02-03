@@ -24,8 +24,8 @@ class DocumentManager
         return $this->client->collections[$collection]->documents->create($data);
     }
 
-    public function import(string $collection, array $data)
+    public function import(string $collection, array $data, string $action = 'create')
     {
-        return $this->client->collections[$collection]->documents->import($data);
+        return $this->client->collections[$collection]->documents->import($data, ['action' => $action]);
     }
 }
