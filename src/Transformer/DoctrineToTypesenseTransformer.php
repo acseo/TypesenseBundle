@@ -85,9 +85,9 @@ class DoctrineToTypesenseTransformer extends AbstractTransformer
             case self::TYPE_OBJECT.self::TYPE_STRING:
                 return $value->__toString();
             case self::TYPE_COLLECTION.self::TYPE_ARRAY_STRING:
-                return $value->map(function ($v) {
+                return array_values($value->map(function ($v) {
                     return $v->__toString();
-                })->toArray();
+                })->toArray());
             case self::TYPE_STRING.self::TYPE_STRING:
                 return (string) $value;
             default:
