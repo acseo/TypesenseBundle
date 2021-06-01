@@ -20,27 +20,44 @@ class TypesenseClient
 
     public function get(string $endpoint): array
     {
-        return $this->api($endpoint, [], 'GET');
+        return $this->api($endpoint, '', 'GET');
     }
 
-    public function post(string $endpoint, array $data = []): array
+    public function post(string $endpoint, array $data = [], bool $import = false): array
     {
+        if ($import) {
+            /**
+             * @author raphaelstolt in json-lines package
+             */
+            $lines = [];
+            foreach ($data as $line) {
+                $lines[] = json_encode($line, JSON_UNESCAPED_UNICODE);
+            }
+
+            $data = implode("\n", $lines)
+            ."\n";
+        } else {
+            $data = json_encode($data);
+        }
+
         return $this->api($endpoint, $data, 'POST');
     }
 
     public function delete(string $endpoint, array $data = []): array
     {
+        $data = json_encode($data);
+
         return $this->api($endpoint, $data, 'DELETE');
     }
 
-    private function api(string $endpoint, array $data = [], string $method = 'POST'): array
+    private function api(string $endpoint, string $data = '', string $method = 'POST'): array
     {
         if ('null' === $this->host) {
             return  [];
         }
 
         $response = $this->client->request($method, "http://{$this->host}/{$endpoint}", [
-            'json' => $data,
+            'body' => $data,
             'headers' => [
                 'X-TYPESENSE-API-KEY' => $this->apiKey,
             ],
