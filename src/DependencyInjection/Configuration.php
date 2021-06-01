@@ -17,7 +17,7 @@ class Configuration implements ConfigurationInterface
                     ->info('Typesense host information')
                     ->addDefaultsIfNotSet()
                     ->children()
-                        ->scalarNode('host')->isRequired()->cannotBeEmpty()->end()
+                        ->scalarNode('url')->isRequired()->cannotBeEmpty()->end()
                         ->scalarNode('key')->isRequired()->cannotBeEmpty()->end()
                     ->end()
                 ->end()
