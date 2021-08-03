@@ -2,13 +2,13 @@
 
 This bundle provides integration with [Typesense](https://typesense.org/) with Symfony. 
 
+It relies on the official [TypeSense PHP](https://github.com/typesense/typesense-php) package
+
 Features include:
 
 - Doctrine object transformer to Typesense indexable data
 - Usefull services to search in collections 
 - Listeners for Doctrine events for automatic indexing
-
-**This Bundle is at his early stage and should be used with caution**
 
 ## Installation
 
@@ -35,7 +35,7 @@ Configure the Bundle
 
 ```
 # .env
-TYPESENSE_URL=localhost:8108
+TYPESENSE_URL=http://localhost:8108
 TYPESENSE_KEY=123
 ```
 
@@ -44,7 +44,7 @@ TYPESENSE_KEY=123
 acseo_typesense:
     # Typesense host settings
     typesense:
-        host: '%env(resolve:TYPESENSE_URL)%'
+        url: '%env(resolve:TYPESENSE_URL)%'
         key: '%env(resolve:TYPESENSE_KEY)%'
     # Collection settings
     collections:
@@ -99,8 +99,8 @@ This bundle comes with useful commands in order to create and index your data
 # Creation collections structure
 php bin/console typesense:create
 
-# Populate collections with Doctrine entities
-php bin/console typesense:populate
+# Import collections with Doctrine entities
+php bin/console typesense:import
 ```
 
 ### Search documents
@@ -183,7 +183,7 @@ The class `TypesenseQuery()` class takes 2 arguments :
 * The search terme (`q`)
 * The fields to search on (`queryBy`)
 
-You can create more complex queries using all the possible Typsense [search arguments](https://typesense.org/docs/0.14.0/api/#search-collection)
+You can create more complex queries using all the possible Typsense [search arguments](https://typesense.org/docs/0.21.0/api/documents.html#arguments)
 
 ```php
 <?php
@@ -264,8 +264,30 @@ Doctrine listeners will update Typesense with Entity data during the following e
 * preDelete
 
 
-### Cookbook 
+## Cookbook 
 ----------------
 
 * [Use Typesense to make an autocomplete field](doc/cookbook/autocomplete.md)
+
+
+## Testing the Bundle
+
+tests are written in the `tests` directory.
+
+*  **Unit** tests doesn't require a running Typesense server
+*  **Functional** tests require a running Typesense server
+
+You can launch the tests with the following commands : 
+
+```bash
+# Unit test
+$ php ./vendor/bin/phpunit tests/Unit
+
+# Functional test
+# First, start a Typesense server with Docker
+$ composer run-script typesenseServer
+$ php ./vendor/bin/phpunit tests/Functional
+```
+
+
 

@@ -60,7 +60,6 @@ class CollectionManager
             $fieldDefinition['type'] = $this->transformer->castType($fieldDefinition['type']);
             $fields[] = $fieldDefinition;
         }
-
         $this->collectionClient->create(
             $definition['typesense_name'],
             $fields,

@@ -24,5 +24,4 @@ class TypesenseClient extends Client
             'connection_timeout_seconds' => 5,
         ]);
     }
-
 }

@@ -33,8 +33,7 @@ class ImportCommand extends Command
         CollectionManager $collectionManager,
         DocumentManager $documentManager,
         DoctrineToTypesenseTransformer $transformer
-    )
-    {
+    ) {
         parent::__construct();
         $this->em = $em;
         $this->collectionManager = $collectionManager;
@@ -74,7 +73,6 @@ class ImportCommand extends Command
             $class = $collectionDefinition['entity'];
 
             $q = $this->em->createQuery('select e from ' . $class . ' e');
-
             $entities = $q->toIterable();
 
             $nbEntities = (int)$this->em->createQuery('select COUNT(u.id) from ' . $class . ' u')->getSingleScalarResult();
@@ -117,9 +115,7 @@ class ImportCommand extends Command
         foreach ($result as $item) {
             if (!$item['success']) {
                 $isError = true;
-                if ($io->isVerbose()) {
-                    $io->error($item['error']);
-                }
+                $io->error($item['error']);
             }
         }
 
