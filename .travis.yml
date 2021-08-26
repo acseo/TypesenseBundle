@@ -12,7 +12,7 @@ matrix:
     fast_finish: true
     include:
           # Minimum supported dependencies with the latest and oldest PHP version
-          - php: 7.1
+          - php: 7.4
           - php: 8.0
 before_install:
     - if [[ $COVERAGE != true ]]; then phpenv config-rm xdebug.ini || true; fi
