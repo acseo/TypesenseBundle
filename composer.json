@@ -10,10 +10,13 @@
         }
     ],    
     "require": {
-        "php": "^7.1.3||^8.0",
+        "php": "^7.4||^8.0",
         "doctrine/orm": "~2.4,>=2.4.5",
         "symfony/framework-bundle": "^3.4|^4.3|^5",
-        "symfony/http-client-contracts": "^1.0|^2.0"
+        "symfony/http-client-contracts": "^1.0|^2.0",
+        "typesense/typesense-php": "^4.1.0",
+        "php-http/curl-client": "^2.2",
+        "monolog/monolog": "^2.3"
     },
     "require-dev": {
         "symfony/phpunit-bridge": "^5.0",
@@ -26,5 +29,11 @@
         "psr-4": {
             "ACSEO\\TypesenseBundle\\Tests\\": "tests/"
         }
+    },
+    "scripts": {
+        "typesenseServer": [
+          "Composer\\Config::disableProcessTimeout",
+          "docker run -i -p 8108:8108 -v/tmp/typesense-server-data-1c/:/data typesense/typesense:0.21.0 --data-dir /data --api-key=123 --listen-port 8108 --enable-cors"
+        ]
     }
 }

@@ -6,9 +6,6 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Style\SymfonyStyle;
-use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
-use Symfony\Component\Console\Input\InputOption;
 use ACSEO\TypesenseBundle\Manager\CollectionManager;
 use ACSEO\TypesenseBundle\Exception\TypesenseException;
 use Symfony\Component\HttpFoundation\Response;
@@ -40,12 +37,10 @@ class CreateCommand extends Command
             try {
                 $output->writeln(sprintf('<info>Deleting</info> <comment>%s</comment>', $name));
                 $this->collectionManager->deleteCollextion($name);
-            } catch (TypesenseException $exception) {
-                if ($exception->status === Response::HTTP_NOT_FOUND && $exception->message === 'Not Found') {
-                    $output->writeln(sprintf('<comment>%s</comment> <info>does not exists</info> ', $name));
-                }
+            } catch (\Typesense\Exceptions\ObjectNotFound $exception) {
+                $output->writeln(sprintf('<comment>%s</comment> <info>does not exists</info> ', $name));
             }
-
+            
             $output->writeln(sprintf('<info>Creating</info> <comment>%s</comment>', $name));
             $this->collectionManager->createCollection($name);
         }

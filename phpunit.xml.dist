@@ -9,7 +9,10 @@
     </exclude>
   </coverage>
   <php>
-    </php>
+    <env name="KERNEL_CLASS" value="App\Kernel" />
+    <env name="TYPESENSE_URL" value="http://localhost:8108" />
+    <env name="TYPESENSE_KEY" value="123" />
+  </php>
   <testsuites>
     <testsuite name="ACSEO Typesense Test Suite">
       <directory>./tests</directory>

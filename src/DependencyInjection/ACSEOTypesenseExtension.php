@@ -73,7 +73,7 @@ class ACSEOTypesenseExtension extends Extension
         $clientId = ('typesense.client');
 
         $clientDef = new ChildDefinition('typesense.client_prototype');
-        $clientDef->replaceArgument(0, $config['host']);
+        $clientDef->replaceArgument(0, $config['url']);
         $clientDef->replaceArgument(1, $config['key']);
         $container->setDefinition($clientId, $clientDef);
     }
