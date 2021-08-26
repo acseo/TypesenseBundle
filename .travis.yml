@@ -3,11 +3,9 @@ sudo: false
 cache:
     directories:
         - $HOME/.composer/cache/files
-        - $HOME/symfony-bridge/.phpunit
 env:
     global:
         - PHPUNIT_FLAGS="-v"
-        - SYMFONY_PHPUNIT_DIR="$HOME/symfony-bridge/.phpunit"
 matrix:
     fast_finish: true
     include:
@@ -20,9 +18,8 @@ before_install:
     - if ! [ -v "$DEPENDENCIES" ]; then composer require --no-update ${DEPENDENCIES}; fi;
 install:
     - composer update ${COMPOSER_FLAGS} --prefer-dist --no-interaction
-    - ./vendor/bin/simple-phpunit install
 script:
     - composer validate --strict --no-check-lock
     # simple-phpunit is the PHPUnit wrapper provided by the PHPUnit Bridge component and
     # it helps with testing legacy code and deprecations (composer require symfony/phpunit-bridge)
-    - ./vendor/bin/simple-phpunit $PHPUNIT_FLAGS tests/Unit
+    - ./vendor/bin/phpunit $PHPUNIT_FLAGS tests/Unit
