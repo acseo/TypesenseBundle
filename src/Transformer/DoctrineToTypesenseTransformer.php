@@ -2,7 +2,7 @@
 
 namespace ACSEO\TypesenseBundle\Transformer;
 
-use Doctrine\Persistence\Proxy;
+use Doctrine\Common\Util\ClassUtils;
 
 class DoctrineToTypesenseTransformer extends AbstractTransformer
 {
@@ -33,9 +33,8 @@ class DoctrineToTypesenseTransformer extends AbstractTransformer
 
     public function convert($entity)
     {
-        $entityClass = ($entity instanceof Proxy)
-        ? get_parent_class($entity)
-        : get_class($entity);
+        $entityClass = ClassUtils::getClass($entity);
+
         if (!isset($this->methodCalls[$entityClass])) {
             throw new \Exception(sprintf('Class %s is not supported for Doctrine To Typesense Transformation', $entityClass));
         }
