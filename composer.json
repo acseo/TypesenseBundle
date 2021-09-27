@@ -11,7 +11,7 @@
     ],    
     "require": {
         "php": "^7.4||^8.0",
-        "doctrine/orm": "~2.4,>=2.4.5",
+        "doctrine/orm": "~2.8,>=2.8.0",
         "symfony/framework-bundle": "^3.4|^4.3|^5",
         "symfony/http-client-contracts": "^1.0|^2.0",
         "typesense/typesense-php": "^4.1.0",

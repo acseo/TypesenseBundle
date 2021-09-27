@@ -6,6 +6,7 @@ use Doctrine\Persistence\Event\LifecycleEventArgs;
 use ACSEO\TypesenseBundle\Manager\CollectionManager;
 use ACSEO\TypesenseBundle\Manager\DocumentManager;
 use ACSEO\TypesenseBundle\Transformer\DoctrineToTypesenseTransformer;
+use Doctrine\Common\Util\ClassUtils;
 
 class TypesenseIndexer
 {
@@ -25,7 +26,7 @@ class TypesenseIndexer
     public function postPersist(LifecycleEventArgs $args)
     {
         $entity = $args->getObject();
-        $entityClassname = get_class($entity);
+        $entityClassname = ClassUtils::getClass($entity);
 
         if (!in_array($entityClassname, array_values($this->managedClassNames))) {
             return;
@@ -40,8 +41,7 @@ class TypesenseIndexer
     public function postUpdate(LifecycleEventArgs $args)
     {
         $entity = $args->getObject();
-        $entityClassname = get_class($entity);
-
+        $entityClassname = ClassUtils::getClass($entity);
         if (!in_array($entityClassname, array_values($this->managedClassNames))) {
             return;
         }
@@ -64,7 +64,7 @@ class TypesenseIndexer
     {
         $entity = $args->getObject();
 
-        $entityClassname = get_class($entity);
+        $entityClassname = ClassUtils::getClass($entity);
 
         if (!in_array($entityClassname, array_values($this->managedClassNames))) {
             return;
