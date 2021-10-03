@@ -6,16 +6,27 @@ class TypesenseQuery
 {
     private $searchParameters;
 
-    public function __construct(string $q, string $queryBy)
+    public function __construct(string $q = null, string $queryBy = null)
     {
         $this->searchParameters = [];
-        $this->addParameter('q', $q);
-        $this->addParameter('query_by', $queryBy);
+        if ($q != null) {
+            $this->addParameter('q', $q);
+        }
+        if ($queryBy != null) {
+            $this->addParameter('query_by', $queryBy);
+        }
+
+        return $this;
     }
 
-    public function getParameters()
+    public function getParameters() : array
     {
         return $this->searchParameters;
+    }
+
+    public function hasParameter($key) : bool
+    {
+        return isset($this->searchParameters[$key]) ? true : false;
     }
     
     /**
@@ -24,7 +35,7 @@ class TypesenseQuery
      * @param [type] $maxHits
      * @return self
      */
-    public function maxHits($maxHits)
+    public function maxHits($maxHits) : self
     {
         return $this->addParameter('max_hits', $maxHits);
     }
@@ -35,7 +46,7 @@ class TypesenseQuery
      * @param boolean $prefix
      * @return self
      */
-    public function prefix(bool $prefix)
+    public function prefix(bool $prefix) : self
     {
         return $this->addParameter('prefix', $prefix);
     }
@@ -46,7 +57,7 @@ class TypesenseQuery
      * @param string $filterBy
      * @return self
      */
-    public function filterBy(string $filterBy)
+    public function filterBy(string $filterBy) : self
     {
         return $this->addParameter('filter_by', $filterBy);
     }
@@ -57,7 +68,7 @@ class TypesenseQuery
      * @param string $sortBy
      * @return selft
      */
-    public function sortBy(string $sortBy)
+    public function sortBy(string $sortBy) : self
     {
         return $this->addParameter('sort_by', $sortBy);
     }
@@ -68,7 +79,7 @@ class TypesenseQuery
      * @param string $facetBy
      * @return self
      */
-    public function facetBy(string $facetBy)
+    public function facetBy(string $facetBy) : self
     {
         return $this->addParameter('facet_by', $facetBy);
     }
@@ -79,7 +90,7 @@ class TypesenseQuery
      * @param integer $maxFacetValues
      * @return self
      */
-    public function maxFacetValues(int $maxFacetValues)
+    public function maxFacetValues(int $maxFacetValues) : self
     {
         return $this->addParameter('max_facet_values', $maxFacetValues);
     }
@@ -90,7 +101,7 @@ class TypesenseQuery
      * @param string $facetQuery
      * @return self
      */
-    public function facetQuery(string $facetQuery)
+    public function facetQuery(string $facetQuery) : self
     {
         return $this->addParameter('facet_query', $facetQuery);
     }
@@ -101,7 +112,7 @@ class TypesenseQuery
      * @param integer $numTypos
      * @return self
      */
-    public function numTypos(int $numTypos)
+    public function numTypos(int $numTypos) : self
     {
         return $this->addParameter('num_typos', $numTypos);
     }
@@ -111,7 +122,7 @@ class TypesenseQuery
      * @param integer $page
      * @return self
      */
-    public function page(int $page)
+    public function page(int $page) : self
     {
         return $this->addParameter('page', $page);
     }
@@ -122,7 +133,7 @@ class TypesenseQuery
      * @param integer $perPage
      * @return self
      */
-    public function perPage(int $perPage)
+    public function perPage(int $perPage) : self
     {
         return $this->addParameter('per_page', $perPage);
     }
@@ -133,7 +144,7 @@ class TypesenseQuery
      * @param string $groupBy
      * @return self
      */
-    public function groupBy(string $groupBy)
+    public function groupBy(string $groupBy) : self
     {
         return $this->addParameter('group_by', $groupBy);
     }
@@ -144,7 +155,7 @@ class TypesenseQuery
      * @param int $groupLimit
      * @return self
      */
-    public function groupLimit(int $groupLimit)
+    public function groupLimit(int $groupLimit) : self
     {
         return $this->addParameter('group_limit', $groupLimit);
     }
@@ -155,7 +166,7 @@ class TypesenseQuery
      * @param string $includeFields
      * @return self
      */
-    public function includeFields(string $includeFields)
+    public function includeFields(string $includeFields) : self
     {
         return $this->addParameter('include_fields', $includeFields);
     }
@@ -166,7 +177,7 @@ class TypesenseQuery
      * @param string $excludeFields
      * @return self
      */
-    public function excludeFields(string $excludeFields)
+    public function excludeFields(string $excludeFields) : self
     {
         return $this->addParameter('exclude_fields', $excludeFields);
     }
@@ -177,7 +188,7 @@ class TypesenseQuery
      * @param string $highlightFullFields
      * @return self
      */
-    public function highlightFullFields(string $highlightFullFields)
+    public function highlightFullFields(string $highlightFullFields) : self
     {
         return $this->addParameter('highlight_full_fields', $highlightFullFields);
     }
@@ -188,7 +199,7 @@ class TypesenseQuery
      * @param integer $snippetThreshold
      * @return self
      */
-    public function snippetThreshold(int $snippetThreshold)
+    public function snippetThreshold(int $snippetThreshold) : self
     {
         return $this->addParameter('snippet_threshold', $snippetThreshold);
     }
@@ -199,7 +210,7 @@ class TypesenseQuery
      * @param integer $dropTokensThreshold
      * @return self
      */
-    public function dropTokensThreshold(int $dropTokensThreshold)
+    public function dropTokensThreshold(int $dropTokensThreshold) : self
     {
         return $this->addParameter('drop_tokens_threshold', $dropTokensThreshold);
     }
@@ -210,7 +221,7 @@ class TypesenseQuery
      * @param integer $typoTokensThreshold
      * @return self
      */
-    public function typoTokensThreshold(int $typoTokensThreshold)
+    public function typoTokensThreshold(int $typoTokensThreshold) : self
     {
         return $this->addParameter('typo_tokens_threshold', $typoTokensThreshold);
     }
@@ -224,7 +235,7 @@ class TypesenseQuery
      * @param string $pinnedHits
      * @return self
      */
-    public function pinnedHits(string $pinnedHits)
+    public function pinnedHits(string $pinnedHits) : self
     {
         return $this->addParameter('pinned_hits', $pinnedHits);
     }
@@ -237,7 +248,7 @@ class TypesenseQuery
      * @param string $hiddenHits
      * @return self
      */
-    public function hiddenHits(string $hiddenHits)
+    public function hiddenHits(string $hiddenHits) : self
     {
         return $this->addParameter('hidden_hits', $hiddenHits);
     }
@@ -249,7 +260,7 @@ class TypesenseQuery
      * @param mixed $value
      * @return self
      */
-    public function addParameter($key, $value)
+    public function addParameter($key, $value) : self
     {
         $this->searchParameters[$key] = $value;
         return $this;

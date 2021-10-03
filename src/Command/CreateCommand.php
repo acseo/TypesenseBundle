@@ -2,13 +2,10 @@
 
 namespace ACSEO\TypesenseBundle\Command;
 
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use ACSEO\TypesenseBundle\Manager\CollectionManager;
-use ACSEO\TypesenseBundle\Exception\TypesenseException;
-use Symfony\Component\HttpFoundation\Response;
 
 class CreateCommand extends Command
 {

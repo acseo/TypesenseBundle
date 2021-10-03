@@ -14,7 +14,7 @@ class Configuration implements ConfigurationInterface
         $treeBuilder->getRootNode()
             ->children()
                 ->arrayNode('typesense')
-                    ->info('Typesense host information')
+                    ->info('Typesense client information')
                     ->addDefaultsIfNotSet()
                     ->children()
                         ->scalarNode('url')->isRequired()->cannotBeEmpty()->end()

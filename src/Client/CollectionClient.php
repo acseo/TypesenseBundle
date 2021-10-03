@@ -2,6 +2,8 @@
 
 namespace ACSEO\TypesenseBundle\Client;
 
+use ACSEO\TypesenseBundle\Finder\TypesenseQuery;
+
 class CollectionClient
 {
     private $client;
@@ -15,9 +17,30 @@ class CollectionClient
         $this->client = $client;
     }
 
-    public function get(string $collectionName, array $queryParameters)
+    public function search(string $collectionName, TypesenseQuery $query)
     {
-        return $this->client->collections[$collectionName]->documents->search($queryParameters);
+        return $this->client->collections[$collectionName]->documents->search($query->getParameters());
+    }
+
+    public function multiSearch(array $searchRequests, ?TypesenseQuery $commonSearchParams)
+    {
+        $searches = [];
+        foreach ($searchRequests as $sr) {
+            if (!$sr instanceof TypesenseQuery) {
+                throw new \Exception('searchRequests must be an array  of TypesenseQuery objects');
+            }
+            if (!$sr->hasParameter('collection')) {
+                throw new \Exception('TypesenseQuery must have the key : `collection` in order to perform multiSearch');
+            }
+            $searches[] = $sr->getParameters();
+        }
+
+        return $this->client->multiSearch->perform(
+            [
+                'searches' => $searches
+            ],
+            $commonSearchParams ? $commonSearchParams->getParameters(): []
+        );
     }
 
     public function list()
