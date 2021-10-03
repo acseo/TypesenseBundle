@@ -255,6 +255,17 @@ class BookController extends AbstractController
     }
 ```
 
+### Use different kind of services
+
+This bundles creates different services that you can use in your Controllers or anywhere you want.
+
+* `typesense.client` : the basic client inherited from the official `typesense-php` package 
+* `typesense.collection_client` : this service allows you to do basic actions on collections, and allows to perform `search` and `multisearch` action.
+* `typesense.finder.*` : this generated service allows you to perform `query` or `rawQuery` on a specific collection. Example of a generated service : `typesense.finder.candidates`
+* `typesense.specificfinder.*.*` : this generated service allows you to run pre-configured requests (declared in : `config/packages/acseo_typesense.yml`). Example of a generated service : `typesense.specificfinder.candidates.default`
+
+Note : there a other services. You can use the `debug:container` command in order to see all of them.
+
 ### Doctrine Listeners
 
 Doctrine listeners will update Typesense with Entity data during the following events :
@@ -263,6 +274,22 @@ Doctrine listeners will update Typesense with Entity data during the following e
 * postUpdate
 * preDelete
 
+### Perform multisearch
+
+You can create [multisearch](https://typesense.org/docs/0.21.0/api/documents.html#federated-multi-search) requests and get results using the `collectionClient` service.
+
+```php
+// Peform multisearch
+
+$searchRequests = [
+    (new TypesenseQuery('Jules'))->addParameter('collection', 'author'),
+    (new TypesenseQuery('Paris'))->addParameter('collection', 'library')  
+];
+
+$commonParams = new TypesenseQuery()->addParameter('query_by', 'name');
+
+$response = $this->collectionClient->multisearch($searchRequests, $commonParams);
+```
 
 ## Cookbook 
 ----------------

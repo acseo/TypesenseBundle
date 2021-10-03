@@ -2,9 +2,6 @@
 
 namespace ACSEO\TypesenseBundle\Finder;
 
-use ACSEO\TypesenseBundle\Finder\TypesenseQuery;
-use ACSEO\TypesenseBundle\Finder\CollectionFinderInterface;
-
 class SpecificCollectionFinder
 {
     private $finder;

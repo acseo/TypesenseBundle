@@ -3,7 +3,6 @@
 namespace ACSEO\TypesenseBundle\Manager;
 
 use ACSEO\TypesenseBundle\Client\TypesenseClient;
-use Typesense\Client;
 
 class DocumentManager
 {

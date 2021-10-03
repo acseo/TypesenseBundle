@@ -2,8 +2,6 @@
 
 namespace ACSEO\TypesenseBundle\Client;
 
-use ACSEO\TypesenseBundle\Exception\TypesenseException;
-use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Typesense\Client;
 
 class TypesenseClient extends Client
