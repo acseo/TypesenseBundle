@@ -3,31 +3,22 @@
 namespace ACSEO\TypesenseBundle\Transformer;
 
 use Doctrine\Common\Util\ClassUtils;
+use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
 
 class DoctrineToTypesenseTransformer extends AbstractTransformer
 {
     private $collectionDefinitions;
     private $entityToCollectionMapping;
-    private $methodCalls;
+    private $accessor;
 
-    public function __construct(array $collectionDefinitions)
+    public function __construct(array $collectionDefinitions, PropertyAccessorInterface $accessor)
     {
         $this->collectionDefinitions = $collectionDefinitions;
-        $this->methodCalls = [];
+        $this->accessor = $accessor;
+
         $this->entityToCollectionMapping = [];
         foreach ($this->collectionDefinitions as $collection => $collectionDefinition) {
             $this->entityToCollectionMapping[$collectionDefinition['entity']] = $collection;
-
-            $this->methodCalls[$collectionDefinition['entity']] = [];
-            foreach ($collectionDefinition['fields'] as $entityAttribute => $definition) {
-                $entityAttribute = $definition['entity_attribute'];
-                $entityAttributeChain = explode('.', $entityAttribute);
-                $methods = [];
-                foreach ($entityAttributeChain as $chainableCall) {
-                    $methods[] = 'get'.ucfirst($chainableCall);
-                }
-                $this->methodCalls[$collectionDefinition['entity']][$definition['name']] = ['entityAttribute' => $entityAttribute, 'entityMethods' => $methods];
-            }
         }
     }
 
@@ -35,25 +26,19 @@ class DoctrineToTypesenseTransformer extends AbstractTransformer
     {
         $entityClass = ClassUtils::getClass($entity);
 
-        if (!isset($this->methodCalls[$entityClass])) {
+        if (!isset($this->$entityToCollectionMapping[$entityClass])) {
             throw new \Exception(sprintf('Class %s is not supported for Doctrine To Typesense Transformation', $entityClass));
         }
 
         $data = [];
-        $methodCalls = $this->methodCalls[$entityClass];
 
-        foreach ($methodCalls as $typesenseField => $callableInfos) {
-            $entityMethods = $callableInfos['entityMethods'];
-            $value = $entity;
-            foreach ($entityMethods as $method) {
-                if (null != $value) {
-                    $value = $value->{$method}();
-                }
-            }
+        $fields = $this->collectionDefinitions[$this->entityToCollectionMapping[$entityClass]]['fields'];
+
+        foreach ($fields as $typesenseField => $fieldsInfo) {
             $data[$typesenseField] = $this->castValue(
                 $entityClass,
                 $typesenseField,
-                $value
+                $this->accessor->getValue($entity, $fieldsInfo['name'])
             );
         }
 
@@ -79,8 +64,6 @@ class DoctrineToTypesenseTransformer extends AbstractTransformer
                 }
 
                 return null;
-            case self::TYPE_PRIMARY.self::TYPE_STRING:
-                return (string) $value;
             case self::TYPE_OBJECT.self::TYPE_STRING:
                 return $value->__toString();
             case self::TYPE_COLLECTION.self::TYPE_ARRAY_STRING:
@@ -88,11 +71,10 @@ class DoctrineToTypesenseTransformer extends AbstractTransformer
                     return $v->__toString();
                 })->toArray());
             case self::TYPE_STRING.self::TYPE_STRING:
+            case self::TYPE_PRIMARY.self::TYPE_STRING:
                 return (string) $value;
             default:
                 return $value;
-
-            break;
         }
     }
 }
