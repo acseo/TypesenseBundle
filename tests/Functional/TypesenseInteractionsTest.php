@@ -18,6 +18,7 @@ use Doctrine\DBAL\Connection;
 use Doctrine\ORM\Configuration;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\AbstractQuery;
+use Symfony\Component\PropertyAccess\PropertyAccess;
 
 /**
  * This test ensure that the commands works great with a
@@ -112,8 +113,9 @@ class TypesenseInteractionsTest extends KernelTestCase
 
         $collectionDefinitions = $this->getCollectionDefinitions(get_class($book));
         $typeSenseClient = new TypesenseClient($_ENV['TYPESENSE_URL'], $_ENV['TYPESENSE_KEY']);
+        $propertyAccessor = PropertyAccess::createPropertyAccessor();
         $collectionClient = new CollectionClient($typeSenseClient);
-        $transformer = new DoctrineToTypesenseTransformer($collectionDefinitions);
+        $transformer = new DoctrineToTypesenseTransformer($collectionDefinitions, $propertyAccessor);
         $collectionManager = new CollectionManager($collectionClient, $transformer, $collectionDefinitions);
 
         $command = new CreateCommand($collectionManager);
@@ -136,8 +138,9 @@ class TypesenseInteractionsTest extends KernelTestCase
         $book = $this->getMockedBook();
         $collectionDefinitions = $this->getCollectionDefinitions(get_class($book));
         $typeSenseClient = new TypesenseClient($_ENV['TYPESENSE_URL'], $_ENV['TYPESENSE_KEY']);
+        $propertyAccessor = PropertyAccess::createPropertyAccessor();
         $collectionClient = new CollectionClient($typeSenseClient);
-        $transformer = new DoctrineToTypesenseTransformer($collectionDefinitions);
+        $transformer = new DoctrineToTypesenseTransformer($collectionDefinitions, $propertyAccessor);
         $documentManager = new DocumentManager($typeSenseClient);
         $collectionManager = new CollectionManager($collectionClient, $transformer, $collectionDefinitions);
         $em = $this->getMockedEntityManager($book);
