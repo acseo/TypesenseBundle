@@ -8,7 +8,7 @@
             "name": "Nicolas Potier",
             "email": "nicolas.potier@acseo.fr"
         }
-    ],    
+    ],
     "require": {
         "php": "^7.4||^8.0",
         "doctrine/orm": "~2.8,>=2.8.0",
@@ -16,7 +16,8 @@
         "symfony/http-client-contracts": "^1.0|^2.0",
         "typesense/typesense-php": "^4.1.0",
         "php-http/curl-client": "^2.2",
-        "monolog/monolog": "^2.3"
+        "monolog/monolog": "^2.3",
+        "symfony/property-access": "^3.4|^4.3|^5"
     },
     "require-dev": {
         "symfony/phpunit-bridge": "^5.0",

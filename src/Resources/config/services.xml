@@ -62,6 +62,7 @@
         <service id="typesense.transformer.doctrine_to_typesense"
                  class="ACSEO\TypesenseBundle\Transformer\DoctrineToTypesenseTransformer">
             <argument/> <!-- collections -->
+            <argument type="service" id="property_accessor" />
         </service>
 
         <!-- commands -->
