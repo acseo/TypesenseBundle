@@ -7,12 +7,14 @@ class Book
     private $id;
     private $title;
     private $author;
+    private $publishedAt;
 
-    public function __construct($id, string $title, $author)
+    public function __construct($id, string $title, $author, \Datetime $publishedAt)
     {
         $this->id = $id;
         $this->title = $title;
         $this->author = $author;
+        $this->publishedAt = $publishedAt;
     }
 
     /**
@@ -73,5 +75,25 @@ class Book
     public function getAuthor()
     {
         return $this->author;
+    }
+
+    /**
+     * Get the value of publishedAt
+     */
+    public function getPublishedAt()
+    {
+        return $this->publishedAt;
+    }
+
+    /**
+     * Set the value of publishedAt
+     *
+     * @return  self
+     */
+    public function setPublishedAt($publishedAt)
+    {
+        $this->publishedAt = $publishedAt;
+
+        return $this;
     }
 }
