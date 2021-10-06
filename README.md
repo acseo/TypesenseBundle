@@ -61,27 +61,28 @@ acseo_typesense:
                 # Using again id as a sortable field (int32 required)
                 #
                 sortable_id:
-                    entity_attribute: id           # Entity attribute name forced
-                    name: sortable_id
+                    entity_attribute: id             # Entity attribute name forced
+                    name: sortable_id                # Typesense field name
                     type: int32
                 title: 
                     name: title
                     type: string
                 author:
                      name: author
-                     type: object                  # Object conversion with __toString()
+                     type: object                    # Object conversion with __toString()
                 author.country:
-                    name: author_country           # Equivalent of $book->getAuthor()->getCountry()
+                    name: author_country           
                     type: string
-                    facet: true                    # Declare field as facet (required to use "group_by" query option)
+                    facet: true                      # Declare field as facet (required to use "group_by" query option)
+                    entity_attribute: author.country # Equivalent of $book->getAuthor()->getCountry()
                 genres:
                     name: genres
-                    type: collection               # Convert ArrayCollection to array of strings
+                    type: collection                 # Convert ArrayCollection to array of strings
                 publishedAt: 
-                    name: published_at
+                    name: publishedAt
                     type: datetime
-                    optional: true                 # Declare field as optional
-            default_sorting_field: sortable_id     # Default sorting field. Must be int32 or float
+                    optional: true                   # Declare field as optional
+            default_sorting_field: sortable_id       # Default sorting field. Must be int32 or float
 ```
 
 You can use basic types supported by Typesense for your fields : string, int32, float, etc.

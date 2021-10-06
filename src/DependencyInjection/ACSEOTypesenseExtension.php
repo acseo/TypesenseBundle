@@ -93,6 +93,13 @@ class ACSEOTypesenseExtension extends Extension
             $primaryKeyExists = false;
             
             foreach ($config['fields'] as $key => $fieldConfig) {
+                if (!isset($fieldConfig['name'])) {
+                    throw new \Exception('acseo_typesense.collections.'.$name.'.'.$key.'.name must be set');
+                }
+                if (!isset($fieldConfig['type'])) {
+                    throw new \Exception('acseo_typesense.collections.'.$name.'.'.$key.'.type must be set');
+                }
+
                 if ($fieldConfig['type'] == 'primary') {
                     $primaryKeyExists = true;
                 }

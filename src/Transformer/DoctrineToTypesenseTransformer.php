@@ -37,16 +37,18 @@ class DoctrineToTypesenseTransformer extends AbstractTransformer
 
         $fields = $this->collectionDefinitions[$this->entityToCollectionMapping[$entityClass]]['fields'];
 
-        foreach ($fields as $typesenseField => $fieldsInfo) {
+        foreach ($fields as $fieldsInfo) {
             try {
                 $value = $this->accessor->getValue($entity, $fieldsInfo['entity_attribute']);
             } catch (UnexpectedTypeException $exception) {
                 $value = null;
             }
+            
+            $name = $fieldsInfo['name'];
 
-            $data[$typesenseField] = $this->castValue(
+            $data[$name] = $this->castValue(
                 $entityClass,
-                $typesenseField,
+                $name,
                 $value
             );
         }
@@ -65,7 +67,6 @@ class DoctrineToTypesenseTransformer extends AbstractTransformer
             )
         );
         $collectionFieldsDefinitions = array_values($this->collectionDefinitions[$collection]['fields']);
-
         $originalType = $collectionFieldsDefinitions[$key]['type'];
         $castedType   = $this->castType($originalType);
 
