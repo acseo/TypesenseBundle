@@ -54,8 +54,6 @@ class TypesenseInteractionsTest extends KernelTestCase
      */
     public function testImportCommand()
     {
-        $book = new Book(null, 'test', null);
-
         $commandTester = $this->importCommandTester();
         $commandTester->execute([]);
 
@@ -72,10 +70,8 @@ class TypesenseInteractionsTest extends KernelTestCase
     {
         $typeSenseClient = new TypesenseClient($_ENV['TYPESENSE_URL'], $_ENV['TYPESENSE_KEY']);
         $collectionClient = new CollectionClient($typeSenseClient);
-        //$book = $this->getMockBuilder('\App\Entity\Book')->getMock();
-        $book = new Book(1, 'test', new Author('Nicolas Potier', 'France'));
+        $book = new Book(1, 'test', new Author('Nicolas Potier', 'France'), new \DateTime());
         $em = $this->getMockedEntityManager([$book]);
-        //$book = $this->getMockBuilder('\App\Entity\Book')->getMock();
         $collectionDefinitions = $this->getCollectionDefinitions(get_class($book));
         $bookDefinition = $collectionDefinitions['books'];
 
@@ -95,7 +91,7 @@ class TypesenseInteractionsTest extends KernelTestCase
         $typeSenseClient = new TypesenseClient($_ENV['TYPESENSE_URL'], $_ENV['TYPESENSE_KEY']);
         $collectionClient = new CollectionClient($typeSenseClient);
         //$book = $this->getMockBuilder('\App\Entity\Book')->getMock();
-        $book = new Book(1, 'test', new Author('Nicolas Potier', 'France'));
+        $book = new Book(1, 'test', new Author('Nicolas Potier', 'France'), new \DateTime());
         
         $em = $this->getMockedEntityManager([$book]);
         $book = $this->getMockBuilder('\App\Entity\Book')->getMock();
@@ -194,11 +190,17 @@ class TypesenseInteractionsTest extends KernelTestCase
                         "type" => "object",
                         "entity_attribute" => "author",
                     ],
-                    "author_country" => [
+                    "michel" => [
                         "name" => "author_country",
                         "type" => "string",
                         "entity_attribute" => "author.country",
                     ],
+                    "publishedAt" => [
+                        "name" => "published_at",
+                        "type" => "datetime",
+                        "optional" => true,
+                        "entity_attribute" => "publishedAt",
+                    ]
                 ],
                 "default_sorting_field" => "sortable_id"
             ]
@@ -211,45 +213,9 @@ class TypesenseInteractionsTest extends KernelTestCase
         $books = [];
         
         for ($i = 0 ; $i < self::NB_BOOKS ; $i++) {
-            $books[] = new Book($i, self::BOOK_TITLES[$i], $author);
+            $books[] = new Book($i, self::BOOK_TITLES[$i], $author, new \DateTime());
         }
-        /*
-        $book = $this->getMockBuilder('\App\Entity\Book')
-        ->addMethods(['getId', 'getTitle', 'getAuthor'])
-        ->getMock();
 
-        $author = $this->getMockBuilder('\App\Entity\Author')
-                ->addMethods(['__toString', 'getCountry'])
-                ->getMock();
-
-        $author->method('__toString')->willReturn('Nicolas Potier');
-
-        // getId is called Twice, for id and sortable_id fields
-        $book->method('getId')->willReturn(
-            $this->onConsecutiveCalls(
-            1,
-            1,
-            2,
-            2,
-            3,
-            3,
-            4,
-            4
-        )
-        );
-        $book->method('getTitle')->willReturn(
-            $this->onConsecutiveCalls(
-            'Sample Book One',
-            'Sample Book Two',
-            'Sample Book Three',
-            'Sample Book Four'
-        )
-        );
-        $author->method('getCountry')->willReturn('France');
-        $book->method('getAuthor')->willReturn($author);
-
-        return $book;
-        */
         return $books;
     }
 
