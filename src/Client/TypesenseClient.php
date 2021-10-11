@@ -14,7 +14,7 @@ use Typesense\Operations;
 
 class TypesenseClient
 {
-    private ?Client $client = null;
+
 
     public function __construct(string $url, string $apiKey)
     {
@@ -122,4 +122,17 @@ class TypesenseClient
         return $this->client->$name(...$arguments);
     }
 
+    public function __get($name)
+    {
+        if (!$this->client) {
+            return null;
+        }
+
+        return $this->client->$name;
+    }
+
+    public function isOperationnal(): bool
+    {
+        return $this->client !== null;
+    }
 }
