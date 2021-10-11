@@ -6,6 +6,8 @@ use ACSEO\TypesenseBundle\Finder\TypesenseQuery;
 
 class CollectionClient
 {
+    private $client;
+
     public function __construct(TypesenseClient $client)
     {
         $this->client = $client;

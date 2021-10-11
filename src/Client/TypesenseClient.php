@@ -14,7 +14,7 @@ use Typesense\Operations;
 
 class TypesenseClient
 {
-    private ?Client $client = null;
+    private $client = null;
 
     public function __construct(string $url, string $apiKey)
     {
