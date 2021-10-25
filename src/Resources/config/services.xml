@@ -57,6 +57,8 @@
             <tag name="doctrine.event_listener" event="postPersist" priority="500" connection="default"/>
             <tag name="doctrine.event_listener" event="postUpdate" priority="500" connection="default"/>
             <tag name="doctrine.event_listener" event="preRemove" priority="500" connection="default"/>
+            <tag name="doctrine.event_listener" event="postRemove" priority="500" connection="default"/>
+            <tag name="doctrine.event_listener" event="postFlush" priority="500" connection="default"/>
         </service>
 
         <service id="typesense.transformer.doctrine_to_typesense"
