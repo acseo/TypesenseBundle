@@ -33,8 +33,8 @@ class DocumentManager
 
     public function import(string $collection, array $data, string $action = 'create')
     {
-        if (!$this->client->isOperationnal()) {
-            return null;
+        if (!$this->client->isOperationnal() || empty($data)) {
+            return [];
         }
 
         return $this->client->collections[$collection]->documents->import($data, ['action' => $action]);
