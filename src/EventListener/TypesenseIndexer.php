@@ -2,11 +2,11 @@
 
 namespace ACSEO\TypesenseBundle\EventListener;
 
-use Doctrine\Persistence\Event\LifecycleEventArgs;
 use ACSEO\TypesenseBundle\Manager\CollectionManager;
 use ACSEO\TypesenseBundle\Manager\DocumentManager;
 use ACSEO\TypesenseBundle\Transformer\DoctrineToTypesenseTransformer;
 use Doctrine\Common\Util\ClassUtils;
+use Doctrine\Persistence\Event\LifecycleEventArgs;
 
 class TypesenseIndexer
 {
@@ -14,76 +14,149 @@ class TypesenseIndexer
     private $transformer;
     private $managedClassNames;
 
-    public function __construct(CollectionManager $collectionManager, DocumentManager $documentManager, DoctrineToTypesenseTransformer $transformer)
-    {
-        $this->collectionManager = $collectionManager;
-        $this->documentManager = $documentManager;
-        $this->transformer = $transformer;
+    private $objetsIdThatCanBeDeletedByObjectHash = [];
+    private $documentsToIndex = [];
+    private $documentsToUpdate = [];
+    private $documentsToDelete = [];
 
-        $this->managedClassNames = $this->collectionManager->getManagedClassNames();
+    public function __construct(
+        CollectionManager $collectionManager,
+        DocumentManager $documentManager,
+        DoctrineToTypesenseTransformer $transformer
+    ) {
+        $this->collectionManager = $collectionManager;
+        $this->documentManager   = $documentManager;
+        $this->transformer       = $transformer;
+
+        $this->managedClassNames  = $this->collectionManager->getManagedClassNames();
+        $this->objectsIDsToDelete = [];
     }
 
     public function postPersist(LifecycleEventArgs $args)
     {
-        $entity = $args->getObject();
-        $entityClassname = ClassUtils::getClass($entity);
+        $entity          = $args->getObject();
 
-        if (!in_array($entityClassname, array_values($this->managedClassNames))) {
+        if ($this->entityIsNotManaged($entity)) {
             return;
         }
 
-        $collection = array_search($entityClassname, $this->managedClassNames);
-        $data = $this->transformer->convert($entity);
-        $this->documentManager->index($collection, $data);
-    }
+        $collection = $this->getCollectionName($entity);
+        $data       = $this->transformer->convert($entity);
 
+        $this->documentsToIndex[] = [$collection, $data];
+    }
 
     public function postUpdate(LifecycleEventArgs $args)
     {
-        $entity = $args->getObject();
-        $entityClassname = ClassUtils::getClass($entity);
-        if (!in_array($entityClassname, array_values($this->managedClassNames))) {
+        $entity          = $args->getObject();
+
+        if ($this->entityIsNotManaged($entity)) {
             return;
         }
 
-        $collectionDefinitionKey = array_search($entityClassname, $this->managedClassNames);
-        $collectionConfig = $this->collectionManager->getCollectionDefinitions()[$collectionDefinitionKey];
+        $collectionDefinitionKey = $this->getCollectionName($entity);
+        $collectionConfig        = $this->collectionManager->getCollectionDefinitions()[$collectionDefinitionKey];
 
+        $this->checkPrimaryKeyExists($collectionConfig);
 
-        $primaryKey = $this->getPrimaryKeyInfo($collectionConfig);
+        $collection = $this->getCollectionName($entity);
+        $data       = $this->transformer->convert($entity);
 
-        $collection = array_search($entityClassname, $this->managedClassNames);
-        $data = $this->transformer->convert($entity);
-   
-        $this->documentManager->delete($collection, $data['id']);
-        $this->documentManager->index($collection, $data);
+        $this->documentsToUpdate[] = [$collection, $data['id'], $data];
     }
 
+    private function checkPrimaryKeyExists($collectionConfig)
+    {
+        foreach ($collectionConfig['fields'] as $config) {
+            if ($config['type'] == 'primary') {
+                return;
+            }
+        }
+        throw new \Exception(
+            sprintf(
+                'Primary key info have not been found for Typesense collection %s',
+                $collectionConfig['typesense_name']
+            )
+        );
+    }
 
     public function preRemove(LifecycleEventArgs $args)
     {
         $entity = $args->getObject();
 
-        $entityClassname = ClassUtils::getClass($entity);
-
-        if (!in_array($entityClassname, array_values($this->managedClassNames))) {
+        if ($this->entityIsNotManaged($entity)) {
             return;
         }
 
-        $collection = array_search($entityClassname, $this->managedClassNames);
         $data = $this->transformer->convert($entity);
 
-        $this->documentManager->delete($collection, $data['id']);
+        $this->objetsIdThatCanBeDeletedByObjectHash[spl_object_hash($entity)] = $data['id'];
     }
 
-
-    private function getPrimaryKeyInfo($collectionConfig)
+    public function postRemove(LifecycleEventArgs $args)
     {
-        foreach ($collectionConfig['fields'] as $name => $config) {
-            if ($config['type'] == 'primary') {
-                return ['entityAttribute' => $name, 'documentAttribute' => $config['name']];
-            }
+        $entity = $args->getObject();
+
+        $entityHash = spl_object_hash($entity);
+
+        if (!isset($this->objetsIdThatCanBeDeletedByObjectHash[$entityHash])) {
+            return;
         }
-        throw new \Exception(sprintf('Primary key info have not been found for Typesense collection %s', $collectionConfig['typesense_name']));
+
+        $collection = $this->getCollectionName($entity);
+
+        $this->documentsToDelete[] = [$collection, $this->objetsIdThatCanBeDeletedByObjectHash[$entityHash]];
+    }
+
+    public function postFlush()
+    {
+        $this->indexDocuments();
+        $this->updateDocuments();
+        $this->deleteDocuments();
+
+        $this->resetDocuments();
+    }
+
+    private function indexDocuments()
+    {
+        foreach ($this->documentsToIndex as $documentToIndex) {
+            $this->documentManager->index(... $documentToIndex);
+        }
+    }
+
+    private function updateDocuments()
+    {
+        foreach ($this->documentsToUpdate as $documentToUpdate) {
+            $this->documentManager->delete($documentToUpdate[0], $documentToUpdate[1]);
+            $this->documentManager->index($documentToUpdate[0], $documentToUpdate[2]);
+        }
+    }
+
+    private function deleteDocuments()
+    {
+        foreach ($this->documentsToDelete as $documentToDelete) {
+            $this->documentManager->delete(...$documentToDelete);
+        }
+    }
+
+    private function resetDocuments()
+    {
+        $this->documentsToIndex  = [];
+        $this->documentsToUpdate = [];
+        $this->documentsToDelete = [];
+    }
+
+    private function entityIsNotManaged($entity)
+    {
+        $entityClassname = ClassUtils::getClass($entity);
+
+        return !in_array($entityClassname, array_values($this->managedClassNames));
+    }
+
+    private function getCollectionName($entity)
+    {
+        $entityClassname = ClassUtils::getClass($entity);
+
+        return array_search($entityClassname, $this->managedClassNames);
     }
 }
