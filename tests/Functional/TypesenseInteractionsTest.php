@@ -6,6 +6,7 @@ use ACSEO\TypesenseBundle\Client\CollectionClient;
 use ACSEO\TypesenseBundle\Client\TypesenseClient;
 use ACSEO\TypesenseBundle\Command\CreateCommand;
 use ACSEO\TypesenseBundle\Command\ImportCommand;
+use ACSEO\TypesenseBundle\EventListener\TypesenseIndexer;
 use ACSEO\TypesenseBundle\Finder\CollectionFinder;
 use ACSEO\TypesenseBundle\Finder\TypesenseQuery;
 use ACSEO\TypesenseBundle\Manager\CollectionManager;
@@ -20,6 +21,7 @@ use Doctrine\DBAL\Connection;
 use Doctrine\ORM\Configuration;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\AbstractQuery;
+use Doctrine\ORM\Event\LifecycleEventArgs;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 
 /**
@@ -72,7 +74,7 @@ class TypesenseInteractionsTest extends KernelTestCase
         $collectionClient = new CollectionClient($typeSenseClient);
         $book = new Book(1, 'test', new Author('Nicolas Potier', 'France'), new \DateTime());
         $em = $this->getMockedEntityManager([$book]);
-        $collectionDefinitions = $this->getCollectionDefinitions(get_class($book));
+        $collectionDefinitions = $this->getCollectionDefinitions(Book::class);
         $bookDefinition = $collectionDefinitions['books'];
 
         $bookFinder = new CollectionFinder($collectionClient, $em, $bookDefinition);
@@ -90,12 +92,10 @@ class TypesenseInteractionsTest extends KernelTestCase
     {
         $typeSenseClient = new TypesenseClient($_ENV['TYPESENSE_URL'], $_ENV['TYPESENSE_KEY']);
         $collectionClient = new CollectionClient($typeSenseClient);
-        //$book = $this->getMockBuilder('\App\Entity\Book')->getMock();
         $book = new Book(1, 'test', new Author('Nicolas Potier', 'France'), new \DateTime());
         
         $em = $this->getMockedEntityManager([$book]);
-        $book = $this->getMockBuilder('\App\Entity\Book')->getMock();
-        $collectionDefinitions = $this->getCollectionDefinitions(get_class($book));
+        $collectionDefinitions = $this->getCollectionDefinitions(Book::class);
         $bookDefinition = $collectionDefinitions['books'];
 
         $bookFinder = new CollectionFinder($collectionClient, $em, $bookDefinition);
@@ -106,6 +106,76 @@ class TypesenseInteractionsTest extends KernelTestCase
         $this->assertArrayHasKey('document', $results[0], "First item does not have the key 'document'");
         $this->assertArrayHasKey('highlights', $results[0], "First item does not have the key 'highlights'");
         $this->assertArrayHasKey('text_match', $results[0], "First item does not have the key 'text_match'");
+    }
+
+
+    /**
+     * @depends testImportCommand
+     */
+    public function testCreateAndDelete()
+    {
+        $book = new Book(1000, 'ACSEO', new Author('Nicolas Potier', 'France'), new \DateTime());
+
+        $typeSenseClient = new TypesenseClient($_ENV['TYPESENSE_URL'], $_ENV['TYPESENSE_KEY']);
+        $collectionClient = new CollectionClient($typeSenseClient);
+        $collectionDefinitions = $this->getCollectionDefinitions(Book::class);
+        $propertyAccessor = PropertyAccess::createPropertyAccessor();
+        $transformer = new DoctrineToTypesenseTransformer($collectionDefinitions, $propertyAccessor);
+        $collectionManager = new CollectionManager($collectionClient, $transformer, $collectionDefinitions);
+        $typeSenseClient = new TypesenseClient($_ENV['TYPESENSE_URL'], $_ENV['TYPESENSE_KEY']);
+        $documentManager = new DocumentManager($typeSenseClient);
+        $collectionDefinitions = $this->getCollectionDefinitions(Book::class);
+        $bookDefinition = $collectionDefinitions['books'];
+        $em = $this->getMockedEntityManager([$book]);
+        $bookFinder = new CollectionFinder($collectionClient, $em, $bookDefinition);
+        
+        // Init the listener
+        $listener = new TypesenseIndexer($collectionManager, $documentManager, $transformer);
+        // Create a LifecycleEventArgs with a book
+        $event = $this->getmockedEventCreate($book);
+        
+        // First Persist
+        $listener->postPersist($event);
+        // First Flush
+        $listener->postFlush($event);
+
+        $query = new TypesenseQuery('ACSEO', 'title');
+        $query->numTypos(0);
+        $results = $bookFinder->rawQuery($query)->getResults();
+        $this->assertCount(1, $results, "result doesn't contains 1 elements");
+        
+        // Update the object
+        $book->setTitle('MARSEILLE');
+        $event = $this->getmockedEventCreate($book);
+
+        // First Update
+        $listener->postUpdate($event);
+        // Second Flush
+        $listener->postFlush($event);
+
+        // We should not find this book title
+        $query = new TypesenseQuery('ACSEO', 'title');
+        $query->numTypos(0);
+        $results = $bookFinder->rawQuery($query)->getResults();
+        $this->assertCount(0, $results, "result doesn't contains 1 elements");
+
+        // But we should find this title
+        $query = new TypesenseQuery('MARSEILLE', 'title');
+        $query->numTypos(0);
+        $results = $bookFinder->rawQuery($query)->getResults();
+        $this->assertCount(1, $results, "result doesn't contains 1 elements");
+        
+        // First Remove
+        $listener->preRemove($event);
+        $listener->postRemove($event);
+        // Third Flush
+        $listener->postFlush($event);
+
+        // We should not find this book title
+        $query = new TypesenseQuery('MARSEILLE', 'title');
+        $query->numTypos(0);
+        $results = $bookFinder->rawQuery($query)->getResults();
+        $this->assertCount(0, $results, "result doesn't contains 0 elements");
     }
 
     /**
@@ -121,7 +191,7 @@ class TypesenseInteractionsTest extends KernelTestCase
         // Author is required
         $author = $this->getMockBuilder('\App\Entity\Author')->getMock();
 
-        $collectionDefinitions = $this->getCollectionDefinitions(get_class($book));
+        $collectionDefinitions = $this->getCollectionDefinitions(Book::class);
         $typeSenseClient = new TypesenseClient($_ENV['TYPESENSE_URL'], $_ENV['TYPESENSE_KEY']);
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
         $collectionClient = new CollectionClient($typeSenseClient);
@@ -237,5 +307,19 @@ class TypesenseInteractionsTest extends KernelTestCase
         $query->method('toIterable')->willReturn($books);
 
         return $em;
+    }
+
+    /**
+      * mock a lifeCycleEventArgs Object
+      *
+      * @param $eventType
+      *
+      * @return \PHPUnit_Framework_MockObject_MockObject
+      */
+    private function getmockedEventCreate($book)
+    {
+        $lifeCycleEvent = $this->createMock(LifecycleEventArgs::class);
+        $lifeCycleEvent->method('getObject')->willReturn($book);
+        return $lifeCycleEvent;
     }
 }
