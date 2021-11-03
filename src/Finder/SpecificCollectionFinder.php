@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace ACSEO\TypesenseBundle\Finder;
 
 class SpecificCollectionFinder
@@ -9,22 +11,20 @@ class SpecificCollectionFinder
 
     public function __construct(CollectionFinderInterface $finder, array $arguments)
     {
-        $this->finder = $finder;
+        $this->finder    = $finder;
         $this->arguments = $arguments;
     }
-    
-    public function search($query) : TypesenseResponse
+
+    public function search($query): TypesenseResponse
     {
         $queryBy = $this->arguments['query_by'];
-        $query = new TypesenseQuery($query, $queryBy);
+        $query   = new TypesenseQuery($query, $queryBy);
         unset($this->arguments['query_by']);
         foreach ($this->arguments as $key => $value) {
             $query->addParameter($key, $value);
         }
 
-        $response = $this->finder->query($query);
+        return $this->finder->query($query);
         //$rawResults = $response->getRawResults();
-
-        return $response;
     }
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace ACSEO\TypesenseBundle\Tests\Functional\Entity;
 
 class Book
@@ -11,14 +13,14 @@ class Book
 
     public function __construct($id, string $title, $author, \Datetime $publishedAt)
     {
-        $this->id = $id;
-        $this->title = $title;
-        $this->author = $author;
+        $this->id          = $id;
+        $this->title       = $title;
+        $this->author      = $author;
         $this->publishedAt = $publishedAt;
     }
 
     /**
-     * Get the value of id
+     * Get the value of id.
      */
     public function getId()
     {
@@ -26,11 +28,9 @@ class Book
     }
 
     /**
-     * Set the value of id
-     *
-     * @return  self
+     * Set the value of id.
      */
-    public function setId($id)
+    public function setId($id): self
     {
         $this->id = $id;
 
@@ -38,7 +38,7 @@ class Book
     }
 
     /**
-     * Get the value of title
+     * Get the value of title.
      */
     public function getTitle()
     {
@@ -46,11 +46,9 @@ class Book
     }
 
     /**
-     * Set the value of title
-     *
-     * @return  self
+     * Set the value of title.
      */
-    public function setTitle($title)
+    public function setTitle($title): self
     {
         $this->title = $title;
 
@@ -58,11 +56,9 @@ class Book
     }
 
     /**
-     * Set the value of author
-     *
-     * @return  self
+     * Set the value of author.
      */
-    public function setAuthor($author)
+    public function setAuthor($author): self
     {
         $this->author = $author;
 
@@ -70,7 +66,7 @@ class Book
     }
 
     /**
-     * Get the value of author
+     * Get the value of author.
      */
     public function getAuthor()
     {
@@ -78,7 +74,7 @@ class Book
     }
 
     /**
-     * Get the value of publishedAt
+     * Get the value of publishedAt.
      */
     public function getPublishedAt()
     {
@@ -86,11 +82,9 @@ class Book
     }
 
     /**
-     * Set the value of publishedAt
-     *
-     * @return  self
+     * Set the value of publishedAt.
      */
-    public function setPublishedAt($publishedAt)
+    public function setPublishedAt($publishedAt): self
     {
         $this->publishedAt = $publishedAt;
 

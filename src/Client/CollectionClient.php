@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace ACSEO\TypesenseBundle\Client;
 
 use ACSEO\TypesenseBundle\Finder\TypesenseQuery;
@@ -8,10 +10,6 @@ class CollectionClient
 {
     private $client;
 
-    /**
-     * @param array $indexes
-     * @param Index $defaultIndex
-     */
     public function __construct(TypesenseClient $client)
     {
         $this->client = $client;
@@ -19,11 +17,19 @@ class CollectionClient
 
     public function search(string $collectionName, TypesenseQuery $query)
     {
+        if (!$this->client->isOperationnal()) {
+            return null;
+        }
+
         return $this->client->collections[$collectionName]->documents->search($query->getParameters());
     }
 
     public function multiSearch(array $searchRequests, ?TypesenseQuery $commonSearchParams)
     {
+        if (!$this->client->isOperationnal()) {
+            return null;
+        }
+
         $searches = [];
         foreach ($searchRequests as $sr) {
             if (!$sr instanceof TypesenseQuery) {
@@ -37,28 +43,40 @@ class CollectionClient
 
         return $this->client->multiSearch->perform(
             [
-                'searches' => $searches
+                'searches' => $searches,
             ],
-            $commonSearchParams ? $commonSearchParams->getParameters(): []
+            $commonSearchParams ? $commonSearchParams->getParameters() : []
         );
     }
 
     public function list()
     {
+        if (!$this->client->isOperationnal()) {
+            return null;
+        }
+
         return $this->client->collections->retrieve();
     }
 
     public function create($name, $fields, $defaultSortingField)
     {
+        if (!$this->client->isOperationnal()) {
+            return null;
+        }
+
         $this->client->collections->create([
-            'name' => $name,
-            'fields' => $fields,
-            'default_sorting_field' => $defaultSortingField
+            'name'                  => $name,
+            'fields'                => $fields,
+            'default_sorting_field' => $defaultSortingField,
         ]);
     }
-    
+
     public function delete(string $name)
     {
+        if (!$this->client->isOperationnal()) {
+            return null;
+        }
+
         return $this->client->collections[$name]->delete();
     }
 }

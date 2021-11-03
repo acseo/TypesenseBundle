@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace ACSEO\Bundle\TypesenseBundle\Tests\Unit\Finder;
 
 use ACSEO\TypesenseBundle\Finder\TypesenseQuery;
@@ -11,7 +13,7 @@ class TypesenseQueryTest extends TestCase
     {
         $query = new TypesenseQuery('search term', 'search field');
 
-        $this->assertEquals(
+        self::assertEquals(
             ['q' => 'search term', 'query_by' => 'search field'],
             $query->getParameters()
         );
@@ -32,22 +34,22 @@ class TypesenseQueryTest extends TestCase
             ->excludeFields('field3,field4')
             ->dropTokensThreshold(0)
         ;
-        
-        $this->assertEquals(
+
+        self::assertEquals(
             [
-                'q' => 'search term',
-                'query_by' => 'search field',
-                'prefix' => false,
-                'filter_by' => 'filter term',
-                'sort_by' =>'sort term',
-                'facet_by' => 'facet term',
-                'max_facet_values' => 10,
-                'num_typos' => 0,
-                'page' => 1,
-                'per_page' => 20,
-                'include_fields' =>'field1,field2',
-                'exclude_fields' => 'field3,field4',
-                'drop_tokens_threshold' => 0
+                'q'                     => 'search term',
+                'query_by'              => 'search field',
+                'prefix'                => false,
+                'filter_by'             => 'filter term',
+                'sort_by'               => 'sort term',
+                'facet_by'              => 'facet term',
+                'max_facet_values'      => 10,
+                'num_typos'             => 0,
+                'page'                  => 1,
+                'per_page'              => 20,
+                'include_fields'        => 'field1,field2',
+                'exclude_fields'        => 'field3,field4',
+                'drop_tokens_threshold' => 0,
             ],
             $query->getParameters()
         );

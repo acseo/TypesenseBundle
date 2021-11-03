@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace ACSEO\TypesenseBundle\Tests\Functional\Entity;
 
 class Author
@@ -9,7 +11,7 @@ class Author
 
     public function __construct(string $name, string $country)
     {
-        $this->name = $name;
+        $this->name    = $name;
         $this->country = $country;
     }
 
@@ -17,9 +19,9 @@ class Author
     {
         return $this->name;
     }
-    
+
     /**
-     * Get the value of name
+     * Get the value of name.
      */
     public function getName()
     {
@@ -27,11 +29,9 @@ class Author
     }
 
     /**
-     * Set the value of name
-     *
-     * @return  self
+     * Set the value of name.
      */
-    public function setName($name)
+    public function setName($name): self
     {
         $this->name = $name;
 
@@ -39,7 +39,7 @@ class Author
     }
 
     /**
-     * Get the value of country
+     * Get the value of country.
      */
     public function getCountry()
     {
@@ -47,11 +47,9 @@ class Author
     }
 
     /**
-     * Set the value of country
-     *
-     * @return  self
+     * Set the value of country.
      */
-    public function setCountry($country)
+    public function setCountry($country): self
     {
         $this->country = $country;
 
