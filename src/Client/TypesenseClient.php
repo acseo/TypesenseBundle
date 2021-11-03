@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace ACSEO\TypesenseBundle\Client;
 
 use Typesense\Aliases;
@@ -14,7 +16,7 @@ use Typesense\Operations;
 
 class TypesenseClient
 {
-    private $client = null;
+    private $client;
 
     public function __construct(string $url, string $apiKey)
     {
@@ -25,7 +27,7 @@ class TypesenseClient
         $urlParsed = parse_url($url);
 
         $this->client = new Client([
-            'nodes'                      => [
+            'nodes' => [
                 [
                     'host'     => $urlParsed['host'],
                     'port'     => $urlParsed['port'],
@@ -119,7 +121,7 @@ class TypesenseClient
             return null;
         }
 
-        return $this->client->$name(...$arguments);
+        return $this->client->{$name}(...$arguments);
     }
 
     public function __get($name)
@@ -128,7 +130,7 @@ class TypesenseClient
             return null;
         }
 
-        return $this->client->$name;
+        return $this->client->{$name};
     }
 
     public function isOperationnal(): bool

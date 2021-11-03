@@ -1,11 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace ACSEO\TypesenseBundle\Command;
 
+use ACSEO\TypesenseBundle\Manager\CollectionManager;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use ACSEO\TypesenseBundle\Manager\CollectionManager;
 
 class CreateCommand extends Command
 {
@@ -26,6 +28,7 @@ class CreateCommand extends Command
 
         ;
     }
+
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $defs = $this->collectionManager->getCollectionDefinitions();
@@ -37,7 +40,7 @@ class CreateCommand extends Command
             } catch (\Typesense\Exceptions\ObjectNotFound $exception) {
                 $output->writeln(sprintf('<comment>%s</comment> <info>does not exists</info> ', $name));
             }
-            
+
             $output->writeln(sprintf('<info>Creating</info> <comment>%s</comment>', $name));
             $this->collectionManager->createCollection($name);
         }

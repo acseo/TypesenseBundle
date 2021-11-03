@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace ACSEO\TypesenseBundle\Client;
 
 use ACSEO\TypesenseBundle\Finder\TypesenseQuery;
@@ -71,6 +73,10 @@ class CollectionClient
 
     public function delete(string $name)
     {
+        if (!$this->client->isOperationnal()) {
+            return null;
+        }
+
         return $this->client->collections[$name]->delete();
     }
 }

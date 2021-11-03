@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace ACSEO\TypesenseBundle\Transformer;
 
 use Doctrine\Common\Util\ClassUtils;
@@ -28,9 +30,7 @@ class DoctrineToTypesenseTransformer extends AbstractTransformer
         $entityClass = ClassUtils::getClass($entity);
 
         if (!isset($this->entityToCollectionMapping[$entityClass])) {
-            throw new \Exception(
-                sprintf('Class %s is not supported for Doctrine To Typesense Transformation', $entityClass)
-            );
+            throw new \Exception(sprintf('Class %s is not supported for Doctrine To Typesense Transformation', $entityClass));
         }
 
         $data = [];
@@ -43,7 +43,7 @@ class DoctrineToTypesenseTransformer extends AbstractTransformer
             } catch (UnexpectedTypeException $exception) {
                 $value = null;
             }
-            
+
             $name = $fieldsInfo['name'];
 
             $data[$name] = $this->castValue(
@@ -58,17 +58,17 @@ class DoctrineToTypesenseTransformer extends AbstractTransformer
 
     public function castValue($entityClass, $name, $value)
     {
-        $collection                  = $this->entityToCollectionMapping[$entityClass];
-        $key                         = array_search(
+        $collection = $this->entityToCollectionMapping[$entityClass];
+        $key        = array_search(
             $name,
             array_column(
                 $this->collectionDefinitions[$collection]['fields'],
                 'name'
-            )
+            ), true
         );
         $collectionFieldsDefinitions = array_values($this->collectionDefinitions[$collection]['fields']);
-        $originalType = $collectionFieldsDefinitions[$key]['type'];
-        $castedType   = $this->castType($originalType);
+        $originalType                = $collectionFieldsDefinitions[$key]['type'];
+        $castedType                  = $this->castType($originalType);
 
         switch ($originalType.$castedType) {
             case self::TYPE_DATETIME.self::TYPE_INT_64:
@@ -87,7 +87,7 @@ class DoctrineToTypesenseTransformer extends AbstractTransformer
                 );
             case self::TYPE_STRING.self::TYPE_STRING:
             case self::TYPE_PRIMARY.self::TYPE_STRING:
-                return (string)$value;
+                return (string) $value;
             default:
                 return $value;
         }

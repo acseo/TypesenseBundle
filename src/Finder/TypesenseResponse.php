@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace ACSEO\TypesenseBundle\Finder;
 
 class TypesenseResponse
@@ -11,21 +13,20 @@ class TypesenseResponse
     private $isHydrated;
     private $page;
     private $searchTimeMs;
-    
 
-    public function __construct(array $result)
+    public function __construct(?array $result)
     {
-        $this->facetCounts = isset($result['facet_counts']) ? $result['facet_counts'] : null;
-        $this->found = $result['found'];
-        $this->hits = $result['hits'];
-        $this->page = $result['page'];
-        $this->searchTimeMs = $result['search_time_ms'];
-        $this->isHydrated = false;
+        $this->facetCounts  = $result['facet_counts']   ?? null;
+        $this->found        = $result['found']          ?? null;
+        $this->hits         = $result['hits']           ?? null;
+        $this->page         = $result['page']           ?? null;
+        $this->searchTimeMs = $result['search_time_ms'] ?? null;
+        $this->isHydrated   = false;
         $this->hydratedHits = null;
     }
 
     /**
-     * Get the value of facetCounts
+     * Get the value of facetCounts.
      */
     public function getFacetCounts()
     {
@@ -33,13 +34,14 @@ class TypesenseResponse
     }
 
     /**
-     * Get the value of hits
+     * Get the value of hits.
      */
     public function getResults()
     {
         if ($this->isHydrated) {
             return $this->hydratedHits;
         }
+
         return $this->hits;
     }
 
@@ -49,15 +51,15 @@ class TypesenseResponse
     }
 
     /**
-     * Get the value of page
+     * Get the value of page.
      */
     public function getPage()
     {
         return $this->page;
     }
-  
+
     /**
-     * Get total hits
+     * Get total hits.
      */
     public function getFound()
     {
@@ -65,11 +67,9 @@ class TypesenseResponse
     }
 
     /**
-     * Set the value of hydratedHits
-     *
-     * @return  self
+     * Set the value of hydratedHits.
      */
-    public function setHydratedHits($hydratedHits)
+    public function setHydratedHits($hydratedHits): self
     {
         $this->hydratedHits = $hydratedHits;
 
@@ -77,11 +77,9 @@ class TypesenseResponse
     }
 
     /**
-     * Set the value of isHydrated
-     *
-     * @return  self
+     * Set the value of isHydrated.
      */
-    public function setHydrated(bool $isHydrated)
+    public function setHydrated(bool $isHydrated): self
     {
         $this->isHydrated = $isHydrated;
 

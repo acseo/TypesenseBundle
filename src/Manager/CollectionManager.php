@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace ACSEO\TypesenseBundle\Manager;
 
 use ACSEO\TypesenseBundle\Client\CollectionClient;
@@ -14,15 +16,15 @@ class CollectionManager
     public function __construct(CollectionClient $collectionClient, AbstractTransformer $transformer, array $collectionDefinitions)
     {
         $this->collectionDefinitions = $collectionDefinitions;
-        $this->collectionClient = $collectionClient;
-        $this->transformer = $transformer;
+        $this->collectionClient      = $collectionClient;
+        $this->transformer           = $transformer;
     }
 
     public function getCollectionDefinitions()
     {
         return $this->collectionDefinitions;
     }
-    
+
     public function getManagedClassNames()
     {
         $managedClassNames = [];
@@ -53,14 +55,14 @@ class CollectionManager
 
     public function createCollection($collectionDefinitionName)
     {
-        $definition = $this->collectionDefinitions[$collectionDefinitionName];
+        $definition       = $this->collectionDefinitions[$collectionDefinitionName];
         $fieldDefinitions = $definition['fields'];
-        $fields = [];
+        $fields           = [];
         foreach ($fieldDefinitions as $key => $fieldDefinition) {
             $fieldDefinition['type'] = $this->transformer->castType($fieldDefinition['type']);
-            $fields[] = $fieldDefinition;
+            $fields[]                = $fieldDefinition;
         }
-        
+
         $this->collectionClient->create(
             $definition['typesense_name'],
             $fields,

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace ACSEO\TypesenseBundle\EventListener;
 
 use ACSEO\TypesenseBundle\Manager\CollectionManager;
@@ -15,9 +17,9 @@ class TypesenseIndexer
     private $managedClassNames;
 
     private $objetsIdThatCanBeDeletedByObjectHash = [];
-    private $documentsToIndex = [];
-    private $documentsToUpdate = [];
-    private $documentsToDelete = [];
+    private $documentsToIndex                     = [];
+    private $documentsToUpdate                    = [];
+    private $documentsToDelete                    = [];
 
     public function __construct(
         CollectionManager $collectionManager,
@@ -34,7 +36,7 @@ class TypesenseIndexer
 
     public function postPersist(LifecycleEventArgs $args)
     {
-        $entity          = $args->getObject();
+        $entity = $args->getObject();
 
         if ($this->entityIsNotManaged($entity)) {
             return;
@@ -48,7 +50,7 @@ class TypesenseIndexer
 
     public function postUpdate(LifecycleEventArgs $args)
     {
-        $entity          = $args->getObject();
+        $entity = $args->getObject();
 
         if ($this->entityIsNotManaged($entity)) {
             return;
@@ -68,16 +70,12 @@ class TypesenseIndexer
     private function checkPrimaryKeyExists($collectionConfig)
     {
         foreach ($collectionConfig['fields'] as $config) {
-            if ($config['type'] == 'primary') {
+            if ($config['type'] === 'primary') {
                 return;
             }
         }
-        throw new \Exception(
-            sprintf(
-                'Primary key info have not been found for Typesense collection %s',
-                $collectionConfig['typesense_name']
-            )
-        );
+
+        throw new \Exception(sprintf('Primary key info have not been found for Typesense collection %s', $collectionConfig['typesense_name']));
     }
 
     public function preRemove(LifecycleEventArgs $args)
@@ -120,7 +118,7 @@ class TypesenseIndexer
     private function indexDocuments()
     {
         foreach ($this->documentsToIndex as $documentToIndex) {
-            $this->documentManager->index(... $documentToIndex);
+            $this->documentManager->index(...$documentToIndex);
         }
     }
 
@@ -150,13 +148,13 @@ class TypesenseIndexer
     {
         $entityClassname = ClassUtils::getClass($entity);
 
-        return !in_array($entityClassname, array_values($this->managedClassNames));
+        return !in_array($entityClassname, array_values($this->managedClassNames), true);
     }
 
     private function getCollectionName($entity)
     {
         $entityClassname = ClassUtils::getClass($entity);
 
-        return array_search($entityClassname, $this->managedClassNames);
+        return array_search($entityClassname, $this->managedClassNames, true);
     }
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace ACSEO\TypesenseBundle\Command;
 
 use ACSEO\TypesenseBundle\Manager\CollectionManager;
@@ -23,7 +25,7 @@ class ImportCommand extends Command
     private const ACTIONS = [
         'create',
         'upsert',
-        'update'
+        'update',
     ];
     private $isError = false;
 
@@ -34,10 +36,10 @@ class ImportCommand extends Command
         DoctrineToTypesenseTransformer $transformer
     ) {
         parent::__construct();
-        $this->em = $em;
+        $this->em                = $em;
         $this->collectionManager = $collectionManager;
-        $this->documentManager = $documentManager;
-        $this->transformer = $transformer;
+        $this->documentManager   = $documentManager;
+        $this->transformer       = $transformer;
     }
 
     protected function configure()
@@ -45,15 +47,17 @@ class ImportCommand extends Command
         $this
             ->setName(self::$defaultName)
             ->setDescription('Import collections from Database')
-            ->addOption('action', null, InputOption::VALUE_OPTIONAL, 'Action modes for typesense import ("create", "upsert" or "update")', 'upsert');
+            ->addOption('action', null, InputOption::VALUE_OPTIONAL, 'Action modes for typesense import ("create", "upsert" or "update")', 'upsert')
+        ;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
 
-        if (!in_array($input->getOption('action'), self::ACTIONS)) {
+        if (!in_array($input->getOption('action'), self::ACTIONS, true)) {
             $io->error('Action option only takes the values : "create", "upsert" or "update"');
+
             return 1;
         }
 
@@ -69,12 +73,12 @@ class ImportCommand extends Command
         $collectionDefinitions = $this->collectionManager->getCollectionDefinitions();
         foreach ($collectionDefinitions as $collectionDefinition) {
             $collectionName = $collectionDefinition['typesense_name'];
-            $class = $collectionDefinition['entity'];
+            $class          = $collectionDefinition['entity'];
 
-            $q = $this->em->createQuery('select e from ' . $class . ' e');
+            $q        = $this->em->createQuery('select e from '.$class.' e');
             $entities = $q->toIterable();
 
-            $nbEntities = (int)$this->em->createQuery('select COUNT(u.id) from ' . $class . ' u')->getSingleScalarResult();
+            $nbEntities = (int) $this->em->createQuery('select COUNT(u.id) from '.$class.' u')->getSingleScalarResult();
             $populated += $nbEntities;
 
             $data = [];
@@ -82,13 +86,14 @@ class ImportCommand extends Command
                 $data[] = $this->transformer->convert($entity);
             }
 
-            $io->text("Import <info>[" . $collectionName . "] " . $class . "</info>");
+            $io->text('Import <info>['.$collectionName.'] '.$class.'</info>');
 
             $result = $this->documentManager->import($collectionName, $data, $action);
 
             if ($this->printErrors($io, $result)) {
                 $this->isError = true;
-                $io->error('Error happened during the import of the collection : ' . $collectionName . ' (you can see them with the option -v)');
+                $io->error('Error happened during the import of the collection : '.$collectionName.' (you can see them with the option -v)');
+
                 return 2;
             }
 
