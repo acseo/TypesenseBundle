@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace ACSEO\TypesenseBundle\Transformer;
 
 use Doctrine\Common\Util\ClassUtils;
-use Symfony\Component\PropertyAccess\Exception\UnexpectedTypeException;
+use Symfony\Component\PropertyAccess\Exception\RuntimeException;
 use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
 
 class DoctrineToTypesenseTransformer extends AbstractTransformer
@@ -40,7 +40,7 @@ class DoctrineToTypesenseTransformer extends AbstractTransformer
         foreach ($fields as $fieldsInfo) {
             try {
                 $value = $this->accessor->getValue($entity, $fieldsInfo['entity_attribute']);
-            } catch (UnexpectedTypeException $exception) {
+            } catch (RuntimeException $exception) {
                 $value = null;
             }
 
