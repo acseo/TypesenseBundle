@@ -25,7 +25,7 @@ class DoctrineToTypesenseTransformer extends AbstractTransformer
         }
     }
 
-    public function convert($entity)
+    public function convert($entity): array
     {
         $entityClass = ClassUtils::getClass($entity);
 
@@ -56,11 +56,11 @@ class DoctrineToTypesenseTransformer extends AbstractTransformer
         return $data;
     }
 
-    public function castValue($entityClass, $name, $value)
+    public function castValue(string $entityClass, string $propertyName, $value)
     {
         $collection = $this->entityToCollectionMapping[$entityClass];
         $key        = array_search(
-            $name,
+            $propertyName,
             array_column(
                 $this->collectionDefinitions[$collection]['fields'],
                 'name'
