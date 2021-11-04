@@ -80,7 +80,7 @@ class ACSEOTypesenseExtension extends Extension
      *
      * @throws \InvalidArgumentException
      */
-    private function loadCollections(array $collections, ContainerBuilder $container): array
+    private function loadCollections(array $collections, ContainerBuilder $container)
     {
         foreach ($collections as $name => $config) {
             $collectionName = $config['collection_name'] ?? $name;
@@ -153,7 +153,7 @@ class ACSEOTypesenseExtension extends Extension
     /**
      * Loads the configured index finders.
      */
-    private function loadCollectionsFinder(ContainerBuilder $container): string
+    private function loadCollectionsFinder(ContainerBuilder $container)
     {
         foreach ($this->collectionsConfig as $name => $config) {
             $collectionName = $config['typesense_name'];
