@@ -62,7 +62,7 @@ class ACSEOTypesenseExtension extends Extension
      *
      * @param ContainerBuilder $container A ContainerBuilder instance
      */
-    private function loadClient($config, ContainerBuilder $container): array
+    private function loadClient($config, ContainerBuilder $container)
     {
         $clientId = ('typesense.client');
 
