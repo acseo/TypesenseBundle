@@ -59,8 +59,6 @@ class TypesenseQuery
 
     /**
      * A list of numerical fields and their corresponding sort orders that will be used for ordering your results. Separate multiple fields with a comma. Upto 3 sort fields can be specified.
-     *
-     * @return selft
      */
     public function sortBy(string $sortBy): self
     {

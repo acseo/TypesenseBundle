@@ -31,7 +31,7 @@ abstract class AbstractTransformer
      * @param string $properyName the property of the object
      * @param [type] $value the value to convert
      */
-    abstract public function castValue(string $objectClass, string $properyName, $value): void;
+    abstract public function castValue(string $objectClass, string $properyName, $value);
 
     /**
      * map a type to a typesense type field.
