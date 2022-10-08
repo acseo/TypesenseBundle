@@ -58,7 +58,7 @@ class CollectionClient
         return $this->client->collections->retrieve();
     }
 
-    public function create($name, $fields, $defaultSortingField, array $tokenSeparators)
+    public function create($name, $fields, $defaultSortingField, array $tokenSeparators, array $symbolsToIndex)
     {
         if (!$this->client->isOperationnal()) {
             return null;
@@ -69,6 +69,7 @@ class CollectionClient
             'fields'                => $fields,
             'default_sorting_field' => $defaultSortingField,
             'token_separators'      => $tokenSeparators,
+            'symbols_to_index'      => $symbolsToIndex
         ]);
     }
 

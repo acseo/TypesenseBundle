@@ -83,6 +83,7 @@ acseo_typesense:
                     type: datetime
                     optional: true                   # Declare field as optional
             default_sorting_field: sortable_id       # Default sorting field. Must be int32 or float
+            symbols_to_index: ['+']                  # Optional - You can add + to this list to make the word c++ indexable verbatim.
         users:
             entity: App\Entity\User
             fields:
