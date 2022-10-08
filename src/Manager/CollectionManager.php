@@ -63,10 +63,14 @@ class CollectionManager
             $fields[]                = $fieldDefinition;
         }
 
+        //For passing tests
+        $tokenSeparators = array_key_exists('token_separators', $definition) ? $definition['token_separators'] : [];
+
         $this->collectionClient->create(
             $definition['typesense_name'],
             $fields,
-            $definition['default_sorting_field']
+            $definition['default_sorting_field'],
+            $tokenSeparators
         );
     }
 }
