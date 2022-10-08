@@ -69,7 +69,7 @@ class CollectionClient
             'fields'                => $fields,
             'default_sorting_field' => $defaultSortingField,
             'token_separators'      => $tokenSeparators,
-            'symbols_to_index'      => $symbolsToIndex
+            'symbols_to_index'      => $symbolsToIndex,
         ]);
     }
 
