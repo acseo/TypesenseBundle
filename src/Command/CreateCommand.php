@@ -36,7 +36,7 @@ class CreateCommand extends Command
         foreach ($defs as $name => $def) {
             try {
                 $output->writeln(sprintf('<info>Deleting</info> <comment>%s</comment>', $name));
-                $this->collectionManager->deleteCollextion($name);
+                $this->collectionManager->deleteCollection($name);
             } catch (\Typesense\Exceptions\ObjectNotFound $exception) {
                 $output->writeln(sprintf('<comment>%s</comment> <info>does not exists</info> ', $name));
             }

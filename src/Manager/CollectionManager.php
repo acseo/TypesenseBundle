@@ -47,10 +47,15 @@ class CollectionManager
         }
     }
 
-    public function deleteCollextion($collectionDefinitionName)
+    public function deleteCollection($collectionDefinitionName)
     {
         $definition = $this->collectionDefinitions[$collectionDefinitionName];
         $this->collectionClient->delete($definition['typesense_name']);
+    }
+
+    public function deleteCollextion($collectionDefinitionName)
+    {
+        return $this->deleteCollection($collectionDefinitionName);
     }
 
     public function createCollection($collectionDefinitionName)
