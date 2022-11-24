@@ -128,6 +128,8 @@ class ACSEOTypesenseExtension extends Extension
                 'name'                  => $name,
                 'fields'                => $config['fields'],
                 'default_sorting_field' => $config['default_sorting_field'],
+                'token_separators'      => $config['token_separators'],
+                'symbols_to_index'      => $config['symbols_to_index'],
             ];
         }
     }
