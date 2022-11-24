@@ -29,6 +29,7 @@ class Configuration implements ConfigurationInterface
                     ->arrayPrototype()
                         ->children()
                             ->scalarNode('entity')->end()
+                            ->scalarNode('collection_name')->end()
                             ->arrayNode('fields')
                                 ->arrayPrototype()
                                     ->children()
