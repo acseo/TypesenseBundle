@@ -1,5 +1,5 @@
 {
-    "name": "acseo/typesense-bundle",
+    "name": "matcaps/typesense-bundle",
     "description": "This bundle provides integration with Typesense in Symfony",
     "type": "symfony-bundle",
     "license": "MIT",
@@ -24,11 +24,11 @@
         "phpunit/phpunit": "^9.5"
     },
     "autoload": {
-        "psr-4": { "ACSEO\\TypesenseBundle\\": "src/" }
+        "psr-4": { "QizunaFr\\TypesenseBundle\\": "src/" }
     },
     "autoload-dev": {
         "psr-4": {
-            "ACSEO\\TypesenseBundle\\Tests\\": "tests/"
+            "QizunaFr\\TypesenseBundle\\Tests\\": "tests/"
         }
     },
     "scripts": {
