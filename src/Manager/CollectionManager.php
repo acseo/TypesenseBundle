@@ -29,7 +29,8 @@ class CollectionManager
     {
         $managedClassNames = [];
         foreach ($this->collectionDefinitions as $name => $collectionDefinition) {
-            $managedClassNames[$name] = $collectionDefinition['entity'];
+            $collectionName = $collectionDefinition['typesense_name'] ?? $name;
+            $managedClassNames[$collectionName] = $collectionDefinition['entity'];
         }
 
         return $managedClassNames;

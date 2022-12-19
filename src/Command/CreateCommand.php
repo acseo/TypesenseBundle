@@ -34,14 +34,16 @@ class CreateCommand extends Command
         $defs = $this->collectionManager->getCollectionDefinitions();
 
         foreach ($defs as $name => $def) {
+            $name = $def['name'];
+            $typesenseName = $def['typesense_name'];
             try {
-                $output->writeln(sprintf('<info>Deleting</info> <comment>%s</comment>', $name));
+                $output->writeln(sprintf('<info>Deleting</info> <comment>%s</comment> (<comment>%s</comment> in Typesense)', $name, $typesenseName));
                 $this->collectionManager->deleteCollextion($name);
             } catch (\Typesense\Exceptions\ObjectNotFound $exception) {
-                $output->writeln(sprintf('<comment>%s</comment> <info>does not exists</info> ', $name));
+                $output->writeln(sprintf('Collection <comment>%s</comment> <info>does not exists</info> ', $typesenseName));
             }
 
-            $output->writeln(sprintf('<info>Creating</info> <comment>%s</comment>', $name));
+            $output->writeln(sprintf('<info>Creating</info> <comment>%s</comment> (<comment>%s</comment> in Typesense)', $name, $typesenseName));
             $this->collectionManager->createCollection($name);
         }
 

@@ -1,0 +1,48 @@
+acseo_typesense:
+    typesense:
+        url: 'http://localhost:8108'
+        key: 'ACSEO'
+    collections:
+    # Collection settings
+        books:                                     # Typesense collection name
+            entity: 'App\Entity\Book'              # Doctrine Entity class
+            collection_name: 'books'
+            fields: 
+                #
+                # Keeping Database and Typesense synchronized with ids
+                #
+                id:                                # Entity attribute name
+                    name: id                       # Typesense attribute name
+                    type: primary                  # Attribute type
+                #
+                # Using again id as a sortable field (int32 required)
+                #
+                sortable_id:
+                    entity_attribute: id             # Entity attribute name forced
+                    name: sortable_id                # Typesense field name
+                    type: int32
+                title: 
+                    name: title
+                    type: string
+                author:
+                     name: author
+                     type: object                    # Object conversion with __toString()
+                author.country:
+                    name: author_country           
+                    type: string
+                    facet: true                      # Declare field as facet (required to use "group_by" query option)
+                    entity_attribute: author.country # Equivalent of $book->getAuthor()->getCountry()
+                genres:
+                    name: genres
+                    type: collection                 # Convert ArrayCollection to array of strings
+                publishedAt: 
+                    name: publishedAt
+                    type: datetime
+                    optional: true                   # Declare field as optional
+            default_sorting_field: sortable_id       # Default sorting field. Must be int32 or float
+            finders: 
+                title_or_author:
+                    finder_parameters:
+                        query_by : 'title,author'
+                        limit: 10
+                        num_typos: 2
