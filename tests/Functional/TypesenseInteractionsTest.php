@@ -308,7 +308,7 @@ class TypesenseInteractionsTest extends KernelTestCase
      *
      * @param $eventType
      */
-    private function getmockedEventCreate($book): \PHPUnit_Framework_MockObject_MockObject
+    private function getmockedEventCreate($book): \PHPUnit\Framework\MockObject\MockObject
     {
         $lifeCycleEvent = $this->createMock(LifecycleEventArgs::class);
         $lifeCycleEvent->method('getObject')->willReturn($book);

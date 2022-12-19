@@ -85,6 +85,22 @@ acseo_typesense:
                     type: datetime
                     optional: true                   # Declare field as optional
             default_sorting_field: sortable_id       # Default sorting field. Must be int32 or float
+            symbols_to_index: ['+']                  # Optional - You can add + to this list to make the word c++ indexable verbatim.
+        users:
+            entity: App\Entity\User
+            fields:
+                id:
+                    name: id
+                    type: primary
+                sortable_id:
+                    entity_attribute: id
+                    name: sortable_id
+                    type: int32
+                email:
+                    name: email
+                    type: string
+            default_sorting_field: sortable_id
+            token_separators: ['+', '-', '@', '.']  # Optional - This will cause contact+docs-example@typesense.org to be indexed as contact, docs, example, typesense and org.
 ```
 
 You can use basic types supported by Typesense for your fields : string, int32, float, etc.

@@ -48,10 +48,15 @@ class CollectionManager
         }
     }
 
-    public function deleteCollextion($collectionDefinitionName)
+    public function deleteCollection($collectionDefinitionName)
     {
         $definition = $this->collectionDefinitions[$collectionDefinitionName];
         $this->collectionClient->delete($definition['typesense_name']);
+    }
+
+    public function deleteCollextion($collectionDefinitionName)
+    {
+        return $this->deleteCollection($collectionDefinitionName);
     }
 
     public function createCollection($collectionDefinitionName)
@@ -64,10 +69,16 @@ class CollectionManager
             $fields[]                = $fieldDefinition;
         }
 
+        //to pass the tests
+        $tokenSeparators = array_key_exists('token_separators', $definition) ? $definition['token_separators'] : [];
+        $symbolsToIndex  = array_key_exists('symbols_to_index', $definition) ? $definition['symbols_to_index'] : [];
+
         $this->collectionClient->create(
             $definition['typesense_name'],
             $fields,
-            $definition['default_sorting_field']
+            $definition['default_sorting_field'],
+            $tokenSeparators,
+            $symbolsToIndex
         );
     }
 }
