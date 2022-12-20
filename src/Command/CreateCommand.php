@@ -38,7 +38,7 @@ class CreateCommand extends Command
             $typesenseName = $def['typesense_name'];
             try {
                 $output->writeln(sprintf('<info>Deleting</info> <comment>%s</comment> (<comment>%s</comment> in Typesense)', $name, $typesenseName));
-                $this->collectionManager->deleteCollextion($name);
+                $this->collectionManager->deleteCollection($name);
             } catch (\Typesense\Exceptions\ObjectNotFound $exception) {
                 $output->writeln(sprintf('Collection <comment>%s</comment> <info>does not exists</info> ', $typesenseName));
             }
