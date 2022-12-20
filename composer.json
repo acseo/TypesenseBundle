@@ -21,7 +21,8 @@
     },
     "require-dev": {
         "symfony/phpunit-bridge": "^5.0|^6.0",
-        "phpunit/phpunit": "^9.5"
+        "phpunit/phpunit": "^9.5",
+        "symfony/yaml": "^3.4 || ^4.4 || ^5.4 || ^6.0"
     },
     "autoload": {
         "psr-4": { "ACSEO\\TypesenseBundle\\": "src/" }
@@ -34,7 +35,7 @@
     "scripts": {
         "typesenseServer": [
           "Composer\\Config::disableProcessTimeout",
-          "docker run -i -p 8108:8108 -v/tmp/typesense-server-data-1c/:/data typesense/typesense:0.22.0 --data-dir /data --api-key=123 --listen-port 8108 --enable-cors"
+          "docker run -i -p 8108:8108 -v/tmp/typesense-server-data-1c/:/data typesense/typesense:0.23.0 --data-dir /data --api-key=123 --listen-port 8108 --enable-cors"
         ]
     }
 }

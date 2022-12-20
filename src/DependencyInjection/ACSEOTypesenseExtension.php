@@ -27,6 +27,13 @@ class ACSEOTypesenseExtension extends Extension
      */
     private $findersConfig = [];
 
+    /**
+     * An array of parameters to use as configured by the extension.
+     *
+     * @var array
+     */
+    private $parameters = [];
+
     public function load(array $configs, ContainerBuilder $container)
     {
         $configuration = new Configuration();
@@ -70,6 +77,8 @@ class ACSEOTypesenseExtension extends Extension
         $clientDef->replaceArgument(0, $config['url']);
         $clientDef->replaceArgument(1, $config['key']);
         $container->setDefinition($clientId, $clientDef);
+
+        $this->parameters['collection_prefix'] = $config['collection_prefix'] ?? '';
     }
 
     /**
@@ -83,7 +92,7 @@ class ACSEOTypesenseExtension extends Extension
     private function loadCollections(array $collections, ContainerBuilder $container)
     {
         foreach ($collections as $name => $config) {
-            $collectionName = $config['collection_name'] ?? $name;
+            $collectionName = $this->parameters['collection_prefix'] . ($config['collection_name'] ?? $name);
 
             $primaryKeyExists = false;
 
@@ -112,8 +121,9 @@ class ACSEOTypesenseExtension extends Extension
 
             if (isset($config['finders'])) {
                 foreach ($config['finders'] as $finderName => $finderConfig) {
-                    $finderName                      = $collectionName.'.'.$finderName;
+                    $finderName                      = $name.'.'.$finderName;
                     $finderConfig['collection_name'] = $collectionName;
+                    $finderConfig['name']            = $name;
                     $finderConfig['finder_name']     = $finderName;
                     if (!isset($finderConfig['finder_parameters']['query_by'])) {
                         throw new \Exception('acseo_typesense.collections.'.$finderName.'.finder_parameters.query_by must be set');
@@ -158,9 +168,10 @@ class ACSEOTypesenseExtension extends Extension
     private function loadCollectionsFinder(ContainerBuilder $container)
     {
         foreach ($this->collectionsConfig as $name => $config) {
-            $collectionName = $config['typesense_name'];
+            $collectionName = $config['name'];
 
             $finderId  = sprintf('typesense.finder.%s', $collectionName);
+            $finderId  = sprintf('typesense.finder.%s', $name);
             $finderDef = new ChildDefinition('typesense.finder');
             $finderDef->replaceArgument(2, $config);
 
@@ -175,7 +186,7 @@ class ACSEOTypesenseExtension extends Extension
     {
         foreach ($this->findersConfig as $name => $config) {
             $finderName     = $config['finder_name'];
-            $collectionName = $config['collection_name'];
+            $collectionName = $config['name'];
             $finderId       = sprintf('typesense.finder.%s', $collectionName);
 
             if (isset($config['finder_service'])) {

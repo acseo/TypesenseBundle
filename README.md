@@ -46,6 +46,8 @@ acseo_typesense:
     typesense:
         url: '%env(resolve:TYPESENSE_URL)%'
         key: '%env(resolve:TYPESENSE_KEY)%'
+        collection_prefix: 'test_'                 # Optional : add prefix to all collection 
+                                                   #            names in Typesense
     # Collection settings
     collections:
         books:                                     # Typesense collection name
