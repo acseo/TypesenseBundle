@@ -11,7 +11,7 @@ class Book
     private $author;
     private $publishedAt;
 
-    public function __construct($id, string $title, $author, \Datetime $publishedAt)
+    public function __construct($id, string $title, $author, \DateTimeInterface $publishedAt)
     {
         $this->id          = $id;
         $this->title       = $title;
