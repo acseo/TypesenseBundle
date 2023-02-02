@@ -56,7 +56,7 @@ class TypesenseIndexer
             return;
         }
 
-        $collectionDefinitionKey = $this->getCollectionName($entity);
+        $collectionDefinitionKey = $this->getCollectionKey($entity);
         $collectionConfig        = $this->collectionManager->getCollectionDefinitions()[$collectionDefinitionKey];
 
         $this->checkPrimaryKeyExists($collectionConfig);
@@ -156,5 +156,16 @@ class TypesenseIndexer
         $entityClassname = ClassUtils::getClass($entity);
 
         return array_search($entityClassname, $this->managedClassNames, true);
+    }
+
+    private function getCollectionKey($entity)
+    {
+        $entityClassname = ClassUtils::getClass($entity);
+
+        foreach ($this->collectionManager->getCollectionDefinitions() as $key => $def) {
+            if ($def['entity'] === $entityClassname) {
+                return $key;
+            }
+        }
     }
 }
