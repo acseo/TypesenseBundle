@@ -24,7 +24,7 @@ class CollectionClient
         return $this->client->collections[$collectionName]->documents->search($query->getParameters());
     }
 
-    public function multiSearch(array $searchRequests, ?TypesenseQuery $commonSearchParams)
+    public function multiSearch(array $searchRequests, ?TypesenseQuery $commonSearchParams = null)
     {
         if (!$this->client->isOperationnal()) {
             return null;
