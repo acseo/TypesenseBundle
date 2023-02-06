@@ -67,8 +67,10 @@ class ImportCommand extends Command
 
         $action = $input->getOption('action');
 
-        $this->em->getConnection()->getConfiguration()->setSQLLogger(null);
-
+        $this->em->getConnection()->getConfiguration()->setMiddlewares(
+            [new \Doctrine\DBAL\Logging\Middleware(new \Psr\Log\NullLogger())]
+        );
+        
         $execStart = microtime(true);
         $populated = 0;
 
@@ -127,10 +129,18 @@ class ImportCommand extends Command
         $nbEntities = (int) $this->em->createQuery('select COUNT(u.id) from '.$class.' u')->getSingleScalarResult();
 
         $nbPages = ceil($nbEntities / $maxPerPage);
+        
         if ($input->getOption('last-page')) {
             $lastPage = $input->getOption('last-page');
+            if ($lastPage > $nbPages) {
+                throw new \Exception('The last-page option ('.$lastPage.') is bigger than the number of pages ('.$nbPages.')');
+            }
         } else {
             $lastPage = $nbPages;
+        }
+
+        if ($lastPage < $firstPage) {
+            throw new \Exception('The first-page option ('.$firstPage.') is bigger than the last-page option ('.$lastPage.')');
         }
 
         $io->text('<info>['.$collectionName.'] '.$class.'</info> '.$nbEntities.' entries to insert splited into '.$nbPages.' pages of '.$maxPerPage.' elements. Insertion from page '.$firstPage.' to '.$lastPage.'.');
@@ -152,7 +162,7 @@ class ImportCommand extends Command
                 $data[] = $this->transformer->convert($entity);
             }
 
-            $io->text('Import <info>['.$collectionName.'] '.$class.'</info> Page '.$i.' of '.$lastPage);
+            $io->text('Import <info>['.$collectionName.'] '.$class.'</info> Page '.$i.' of '.$lastPage.' ('.count($data).' items)');
 
             $result = $this->documentManager->import($collectionName, $data, $action);
 

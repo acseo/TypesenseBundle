@@ -2,10 +2,8 @@
 
 declare(strict_types=1);
 
-namespace ACSEO\Bundle\TypesenseBundle\Tests\Transformer;
+namespace ACSEO\TypesenseBundle\Tests\Transformer;
 
-use ACSEO\TypesenseBundle\Client\CollectionClient;
-use ACSEO\TypesenseBundle\Client\TypesenseClient;
 use ACSEO\TypesenseBundle\Tests\Functional\Entity\Book;
 use ACSEO\TypesenseBundle\Tests\Functional\Entity\Author;
 use ACSEO\TypesenseBundle\Transformer\DoctrineToTypesenseTransformer;
