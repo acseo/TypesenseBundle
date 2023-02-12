@@ -26,7 +26,6 @@ class CreateCommand extends Command
     protected function configure()
     {
         $this
-            ->setName(self::$defaultName)
             ->setDescription('Create Typsenses indexes')
 
         ;

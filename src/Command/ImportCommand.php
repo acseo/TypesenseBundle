@@ -47,7 +47,6 @@ class ImportCommand extends Command
     protected function configure()
     {
         $this
-            ->setName(self::$defaultName)
             ->setDescription('Import collections from Database')
             ->addOption('action', null, InputOption::VALUE_OPTIONAL, 'Action modes for typesense import ("create", "upsert" or "update")', 'upsert')
             ->addOption('indexes', null, InputOption::VALUE_OPTIONAL, 'The index(es) to repopulate. Comma separated values')
