@@ -11,20 +11,21 @@ jobs:
     strategy:
       matrix:
         php:
-          - '7.4'
+          #- '7.4'
           - '8.0'
           - '8.1'
         symfony:
           - '4.4.*'
-          - '5.4.*'       
+          - '5.4.*'   
+          - '6.0.*'
         dependencies:
           - 'highest'
-        include:
-          - php: '7.4'
-            dependencies: 'lowest'
-        exclude:
-          - php: '7.4'
-            dependencies: 'highest'               
+        # include:
+        #   - php: '7.4'
+        #     dependencies: 'lowest'
+        # exclude:
+        #   - php: '7.4'
+        #     dependencies: 'highest'               
     steps:
     - name: 'Checkout'
       uses: actions/checkout@v3
@@ -42,11 +43,16 @@ jobs:
         dependency-versions: "${{ matrix.dependencies }}"
         composer-options: "--no-interaction --no-plugins" 
 
-    # - uses: php-actions/phpunit@v3
-    #   with:
-    #     version
-    - name: 'Run unit tests'
+    - name: 'Setup Typesense'
+      run: |
+        docker run -d --name=typesense -p 8108:8108 typesense/typesense:0.23.0 --api-key=123 --listen-port 8108 --enable-cors
+
+    - name: 'Run Unit tests'
       run: |
         vendor/bin/phpunit tests/Unit
+
+    - name: 'Run Functionnal tests'
+      run: |
+        vendor/bin/phpunit tests/Functional
  
     # ... then your own project steps ...
