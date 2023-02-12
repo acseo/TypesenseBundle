@@ -11,21 +11,21 @@ jobs:
     strategy:
       matrix:
         php:
-          #- '7.4'
+          - '7.4'
           #- '8.0'
-          - '8.1'
+          - '8.2'
         symfony:
-          #- '4.4.*'
-          #- '5.4.*'   
+          - '4.4.*'
+          - '5.4.*'   
           - '6.0.*'
         dependencies:
           - 'highest'
-        # include:
-        #   - php: '7.4'
-        #     dependencies: 'lowest'
-        # exclude:
-        #   - php: '7.4'
-        #     dependencies: 'highest'               
+        include:
+          - php: '7.4'
+            dependencies: 'lowest'
+        exclude:
+          - php: '7.4'
+            dependencies: 'highest'               
     steps:
     - name: 'Checkout'
       uses: actions/checkout@v3
@@ -35,6 +35,7 @@ jobs:
       with:
         php-version: '${{ matrix.php }}'
         coverage: 'none'
+        tools: 'composer:v2, flex'
         extensions: 'curl, json, intl, mbstring, mongodb, openssl'    
 
     - name: 'Install Composer dependencies' 
