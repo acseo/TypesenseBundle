@@ -46,7 +46,7 @@ jobs:
     - name: 'Setup Typesense'
       run: |
         docker network create typesense
-        docker run -d --name=typesense --network=typesense -p 8108:8108 typesense/typesense:0.23.0 --api-key=123 --listen-port 8108 --enable-cors
+        docker run -d --name=typesense --network=typesense -p 8108:8108 typesense/typesense:0.23.0 --data-dir /tmp --api-key=123 --listen-port 8108 --enable-cors
         docker run --rm --network=typesense curlimages/curl --max-time 120 --retry-max-time 120 --retry 120 --retry-delay 5 --retry-all-errors --show-error --silent http://typesense:8108
 
     - name: 'Run Unit tests'
