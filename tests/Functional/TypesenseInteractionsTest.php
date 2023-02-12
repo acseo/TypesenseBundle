@@ -41,6 +41,10 @@ class TypesenseInteractionsTest extends KernelTestCase
         'La chute du monstre',
     ];
 
+    // Dirty Method to count number of call to the method toIterable in order to return
+    // the good results
+    public $cptToIterableCall = 0;
+
     public function testCreateCommand()
     {
         $commandTester = $this->createCommandTester();
