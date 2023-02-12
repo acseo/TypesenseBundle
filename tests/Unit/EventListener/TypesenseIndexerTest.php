@@ -21,6 +21,14 @@ class TypesenseIndexerTest extends TestCase
 {
     use ProphecyTrait;
 
+    private $objectManager;
+
+    private $propertyAccessor;
+
+    private $documentManager;
+
+    private $eventListener;
+    
     public function setUp(): void
     {
         $this->objectManager = $this->prophesize(ObjectManager::class);
