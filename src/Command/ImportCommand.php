@@ -48,6 +48,10 @@ class ImportCommand extends Command
             ->setName(self::$defaultName)
             ->setDescription('Import collections from Database')
             ->addOption('action', null, InputOption::VALUE_OPTIONAL, 'Action modes for typesense import ("create", "upsert" or "update")', 'upsert')
+            ->addOption('indexes', null, InputOption::VALUE_OPTIONAL, 'The index(es) to repopulate. Comma separated values')
+            ->addOption('first-page', null, InputOption::VALUE_REQUIRED, 'The pager\'s page to start population from. Including the given page.', 1)
+            ->addOption('last-page', null, InputOption::VALUE_REQUIRED, 'The pager\'s page to end population on. Including the given page.', null)
+            ->addOption('max-per-page', null, InputOption::VALUE_REQUIRED, 'The pager\'s page size', 100)
         ;
     }
 
@@ -63,41 +67,35 @@ class ImportCommand extends Command
 
         $action = $input->getOption('action');
 
-        $this->em->getConnection()->getConfiguration()->setSQLLogger(null);
-
+        $this->em->getConnection()->getConfiguration()->setMiddlewares(
+            [new \Doctrine\DBAL\Logging\Middleware(new \Psr\Log\NullLogger())]
+        );
+        
         $execStart = microtime(true);
         $populated = 0;
 
         $io->newLine();
 
         $collectionDefinitions = $this->collectionManager->getCollectionDefinitions();
-        foreach ($collectionDefinitions as $collectionDefinition) {
-            $collectionName = $collectionDefinition['typesense_name'];
-            $class          = $collectionDefinition['entity'];
 
-            $q        = $this->em->createQuery('select e from '.$class.' e');
-            $entities = $q->toIterable();
-
-            $nbEntities = (int) $this->em->createQuery('select COUNT(u.id) from '.$class.' u')->getSingleScalarResult();
-            $populated += $nbEntities;
-
-            $data = [];
-            foreach ($entities as $entity) {
-                $data[] = $this->transformer->convert($entity);
-            }
-
-            $io->text('Import <info>['.$collectionName.'] '.$class.'</info>');
-
-            $result = $this->documentManager->import($collectionName, $data, $action);
-
-            if ($this->printErrors($io, $result)) {
-                $this->isError = true;
-                $io->error('Error happened during the import of the collection : '.$collectionName.' (you can see them with the option -v)');
+        $indexes = (null !== $indexes = $input->getOption('indexes')) ? explode(',', $indexes) : \array_keys($collectionDefinitions);
+        foreach ($indexes as $index) {
+            if (!isset($collectionDefinitions[$index])) {
+                $io->error('Unable to find index "'.$index.'" in collection definition (available : '.implode(', ', array_keys($collectionDefinitions)).')');
 
                 return 2;
             }
+        }
 
-            $io->newLine();
+        foreach ($indexes as $index) {
+            try {
+                $populated += $this->populateIndex($input, $output, $index);
+            } catch (\Throwable $e) {
+                $this->isError = true;
+                $io->error($e->getMessage());
+
+                return 2;
+            }
         }
 
         $io->newLine();
@@ -111,6 +109,75 @@ class ImportCommand extends Command
         }
 
         return 0;
+    }
+
+    private function populateIndex(InputInterface $input, OutputInterface $output, string $index)
+    {
+        $populated = 0;
+        $io        = new SymfonyStyle($input, $output);
+
+        $collectionDefinitions = $this->collectionManager->getCollectionDefinitions();
+        $collectionDefinition  = $collectionDefinitions[$index];
+        $action                = $input->getOption('action');
+
+        $firstPage  = $input->getOption('first-page');
+        $maxPerPage = $input->getOption('max-per-page');
+
+        $collectionName = $collectionDefinition['typesense_name'];
+        $class          = $collectionDefinition['entity'];
+
+        $nbEntities = (int) $this->em->createQuery('select COUNT(u.id) from '.$class.' u')->getSingleScalarResult();
+
+        $nbPages = ceil($nbEntities / $maxPerPage);
+        
+        if ($input->getOption('last-page')) {
+            $lastPage = $input->getOption('last-page');
+            if ($lastPage > $nbPages) {
+                throw new \Exception('The last-page option ('.$lastPage.') is bigger than the number of pages ('.$nbPages.')');
+            }
+        } else {
+            $lastPage = $nbPages;
+        }
+
+        if ($lastPage < $firstPage) {
+            throw new \Exception('The first-page option ('.$firstPage.') is bigger than the last-page option ('.$lastPage.')');
+        }
+
+        $io->text('<info>['.$collectionName.'] '.$class.'</info> '.$nbEntities.' entries to insert splited into '.$nbPages.' pages of '.$maxPerPage.' elements. Insertion from page '.$firstPage.' to '.$lastPage.'.');
+
+        for ($i = $firstPage; $i <= $lastPage; ++$i) {
+            $q = $this->em->createQuery('select e from '.$class.' e')
+                ->setFirstResult(($i - 1) * $maxPerPage)
+                ->setMaxResults($maxPerPage)
+            ;
+
+            if ($io->isDebug()) {
+                $io->text('<info>Running request : </info>'.$q->getSQL());
+            }
+
+            $entities = $q->toIterable();
+
+            $data = [];
+            foreach ($entities as $entity) {
+                $data[] = $this->transformer->convert($entity);
+            }
+
+            $io->text('Import <info>['.$collectionName.'] '.$class.'</info> Page '.$i.' of '.$lastPage.' ('.count($data).' items)');
+
+            $result = $this->documentManager->import($collectionName, $data, $action);
+
+            if ($this->printErrors($io, $result)) {
+                $this->isError = true;
+
+                throw new \Exception('Error happened during the import of the collection : '.$collectionName.' (you can see them with the option -v)');
+            }
+
+            $populated += count($data);
+        }
+
+        $io->newLine();
+
+        return $populated;
     }
 
     private function printErrors(SymfonyStyle $io, array $result): bool
