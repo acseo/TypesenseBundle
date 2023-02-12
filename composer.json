@@ -3,6 +3,12 @@
     "description": "This bundle provides integration with Typesense in Symfony",
     "type": "symfony-bundle",
     "license": "MIT",
+    "keywords": [
+        "doctrine2",
+        "typesense",
+        "search"
+    ],    
+    "homepage": "https://github.com/acseo/TypesenseBundle",    
     "authors": [
         {
             "name": "Nicolas Potier",
