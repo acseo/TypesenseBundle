@@ -6,6 +6,7 @@ jobs:
   build-test:
     runs-on: ubuntu-latest
     name: 'PHPUnit (PHP ${{ matrix.php }}, Symfony ${{ matrix.symfony }} + ${{ matrix.dependencies }} deps, ES ${{ matrix.elasticsearch }})'
+    timeout-minutes: 10
     env:
       SYMFONY_REQUIRE: "${{ matrix.symfony }}"    
     strategy:
