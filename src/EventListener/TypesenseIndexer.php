@@ -12,8 +12,10 @@ use Doctrine\Persistence\Event\LifecycleEventArgs;
 
 class TypesenseIndexer
 {
-    private $collectionManager;
-    private $transformer;
+    private CollectionManager $collectionManager;
+    private DoctrineToTypesenseTransformer $transformer;
+    private DocumentManager $documentManager;
+
     private $managedClassNames;
 
     private $objetsIdThatCanBeDeletedByObjectHash = [];
@@ -31,7 +33,6 @@ class TypesenseIndexer
         $this->transformer       = $transformer;
 
         $this->managedClassNames  = $this->collectionManager->getManagedClassNames();
-        $this->objectsIDsToDelete = [];
     }
 
     public function postPersist(LifecycleEventArgs $args)
