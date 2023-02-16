@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace ACSEO\TypesenseBundle\Transformer;
 
 use Doctrine\Common\Util\ClassUtils;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\PropertyAccess\Exception\RuntimeException;
 use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
 
@@ -13,11 +14,13 @@ class DoctrineToTypesenseTransformer extends AbstractTransformer
     private $collectionDefinitions;
     private $entityToCollectionMapping;
     private $accessor;
+    private $container;
 
-    public function __construct(array $collectionDefinitions, PropertyAccessorInterface $accessor)
+    public function __construct(array $collectionDefinitions, PropertyAccessorInterface $accessor, ContainerInterface $container)
     {
         $this->collectionDefinitions = $collectionDefinitions;
         $this->accessor              = $accessor;
+        $this->container              = $container;
 
         $this->entityToCollectionMapping = [];
         foreach ($this->collectionDefinitions as $collection => $collectionDefinition) {
@@ -38,10 +41,16 @@ class DoctrineToTypesenseTransformer extends AbstractTransformer
         $fields = $this->collectionDefinitions[$this->entityToCollectionMapping[$entityClass]]['fields'];
 
         foreach ($fields as $fieldsInfo) {
-            try {
-                $value = $this->accessor->getValue($entity, $fieldsInfo['entity_attribute']);
-            } catch (RuntimeException $exception) {
-                $value = null;
+            $entityAttribute = $fieldsInfo['entity_attribute'];
+
+            if (str_contains($entityAttribute, '::')) {
+                $value = $this->getFieldValueFromService($entity, $entityAttribute);
+            } else {
+                try {
+                    $value = $this->accessor->getValue($entity, $fieldsInfo['entity_attribute']);
+                } catch (RuntimeException $exception) {
+                    $value = null;
+                }
             }
 
             $name = $fieldsInfo['name'];
@@ -92,4 +101,19 @@ class DoctrineToTypesenseTransformer extends AbstractTransformer
                 return $value;
         }
     }
+
+    private function getFieldValueFromService($entity, $entityAttribute)
+    {
+        $values = explode('::', $entityAttribute);
+
+        if (count($values) === 2) {
+            if ($this->container->has($values[0])) {
+                $service = $this->container->get($values[0]);
+                return call_user_func(array($service, $values[1]), $entity);
+            }
+        }
+
+        return null;
+    }
+
 }

@@ -6,7 +6,9 @@ namespace ACSEO\TypesenseBundle\Tests\Transformer;
 
 use ACSEO\TypesenseBundle\Tests\Functional\Entity\Book;
 use ACSEO\TypesenseBundle\Tests\Functional\Entity\Author;
+use ACSEO\TypesenseBundle\Tests\Functional\Service\BookConverter;
 use ACSEO\TypesenseBundle\Transformer\DoctrineToTypesenseTransformer;
+use Symfony\Component\DependencyInjection\Container;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use PHPUnit\Framework\TestCase;
 
@@ -17,7 +19,8 @@ class DoctrineToTypesenseTransformerTest extends TestCase
     {
         $collectionDefinitions = $this->getCollectionDefinitions(Book::class);
         $propertyAccessor      = PropertyAccess::createPropertyAccessor();
-        $transformer           = new DoctrineToTypesenseTransformer($collectionDefinitions, $propertyAccessor);
+        $container             = $this->getContainerInstance();
+        $transformer           = new DoctrineToTypesenseTransformer($collectionDefinitions, $propertyAccessor, $container);
 
         $book                  = new Book(1, 'test', new Author('Nicolas Potier', 'France'), new \Datetime('02/10/1984'));
         self::assertEquals(
@@ -27,7 +30,8 @@ class DoctrineToTypesenseTransformerTest extends TestCase
                 "title" => "test",
                 "author" => "Nicolas Potier",
                 "author_country" => "France",
-                "published_at" => 445219200
+                "published_at" => 445219200,
+                "cover_image_url" => "http://fake.image/1"
             ],
             $transformer->convert($book)
         );   
@@ -41,7 +45,8 @@ class DoctrineToTypesenseTransformerTest extends TestCase
                 "title" => "test",
                 "author" => "Nicolas Potier",
                 "author_country" => "France",
-                "published_at" => 445219200
+                "published_at" => 445219200,
+                "cover_image_url" => "http://fake.image/1"
             ],
             $transformer->convert($book)
         );          
@@ -51,7 +56,8 @@ class DoctrineToTypesenseTransformerTest extends TestCase
     {
         $collectionDefinitions = $this->getCollectionDefinitions(Book::class);
         $propertyAccessor      = PropertyAccess::createPropertyAccessor();
-        $transformer           = new DoctrineToTypesenseTransformer($collectionDefinitions, $propertyAccessor);
+        $container             = $this->getContainerInstance();
+        $transformer           = new DoctrineToTypesenseTransformer($collectionDefinitions, $propertyAccessor, $container);
         //Datetime
         $value                  = $transformer->castValue(Book::class, 'published_at', new \Datetime('02/10/1984'));
         self::assertEquals(445219200, $value);
@@ -64,8 +70,9 @@ class DoctrineToTypesenseTransformerTest extends TestCase
     {
         $collectionDefinitions = $this->getCollectionDefinitions(Book::class);
         $propertyAccessor      = PropertyAccess::createPropertyAccessor();
-        $transformer           = new DoctrineToTypesenseTransformer($collectionDefinitions, $propertyAccessor);
-        
+        $container             = $this->getContainerInstance();
+        $transformer           = new DoctrineToTypesenseTransformer($collectionDefinitions, $propertyAccessor, $container);
+
         // Conversion OK
         $author                 = new Author('Nicolas Potier', 'France');
         $value                  = $transformer->castValue(Book::class, 'author', $author);
@@ -115,9 +122,22 @@ class DoctrineToTypesenseTransformerTest extends TestCase
                         'optional'         => true,
                         'entity_attribute' => 'publishedAt',
                     ],
+                    'cover_image_url' => [
+                        'name'             => 'cover_image_url',
+                        'type'             => 'string',
+                        'optional'         => true,
+                        'entity_attribute' => 'ACSEO\TypesenseBundle\Tests\Functional\Service\BookConverter::getCoverImageURL',
+                    ]
                 ],
                 'default_sorting_field' => 'sortable_id',
             ],
         ];
+    }
+
+    private function getContainerInstance()
+    {
+        $containerInstance = new Container();
+        $containerInstance->set('ACSEO\TypesenseBundle\Tests\Functional\Service\BookConverter', new BookConverter());
+        return $containerInstance;
     }
 }
