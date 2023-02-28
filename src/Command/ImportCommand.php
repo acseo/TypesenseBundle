@@ -67,10 +67,16 @@ class ImportCommand extends Command
 
         $action = $input->getOption('action');
 
-        $this->em->getConnection()->getConfiguration()->setMiddlewares(
-            [new \Doctrine\DBAL\Logging\Middleware(new \Psr\Log\NullLogger())]
-        );
-        
+        // 'setMiddlewares' method only exists for Doctrine version >=3.0.0
+        if (method_exists($this->em->getConnection()->getConfiguration(), 'setMiddlewares')) {
+            $this->em->getConnection()->getConfiguration()->setMiddlewares(
+                [new \Doctrine\DBAL\Logging\Middleware(new \Psr\Log\NullLogger())]
+            );
+        } else {
+            // keep compatibility with versions 2.x.x of Doctrine
+            $this->em->getConnection()->getConfiguration()->setSQLLogger(null);
+        }
+
         $execStart = microtime(true);
         $populated = 0;
 
