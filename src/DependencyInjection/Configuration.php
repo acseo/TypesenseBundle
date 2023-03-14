@@ -38,7 +38,6 @@ class Configuration implements ConfigurationInterface
                                         ->scalarNode('name')->end()
                                         ->scalarNode('type')->end()
                                         ->booleanNode('facet')->end()
-                                        ->booleanNode('sort')->end()
                                         ->booleanNode('optional')->end()
                                     ->end()
                                 ->end()
