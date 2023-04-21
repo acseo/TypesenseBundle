@@ -125,8 +125,7 @@ class TypesenseIndexer
     private function updateDocuments()
     {
         foreach ($this->documentsToUpdate as $documentToUpdate) {
-            $this->documentManager->delete($documentToUpdate[0], $documentToUpdate[1]);
-            $this->documentManager->index($documentToUpdate[0], $documentToUpdate[2]);
+            $this->documentManager->upsert($documentToUpdate[0], $documentToUpdate[2]);
         }
     }
 
