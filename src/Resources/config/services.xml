@@ -68,6 +68,10 @@
             <argument type="service" id="service_container" />
         </service>
 
+        <service id="typesense.data_provider" class="ACSEO\TypesenseBundle\DataProvider\EntityDataProvider">
+            <argument type="service" id="doctrine.orm.entity_manager"/>
+        </service>
+
         <!-- commands -->
         <service id="typesense.command.create" class="ACSEO\TypesenseBundle\Command\CreateCommand" public="true">
             <tag name="console.command"/>
@@ -80,6 +84,7 @@
             <argument type="service" id="typesense.collection_manager"/>
             <argument type="service" id="typesense.document_manager"/>
             <argument type="service" id="typesense.transformer.doctrine_to_typesense"/>
+            <argument type="service" id="typesense.data_provider"/>
         </service>
     </services>
 </container>
