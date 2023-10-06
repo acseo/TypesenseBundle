@@ -29,6 +29,13 @@ class DoctrineToTypesenseTransformer extends AbstractTransformer
     {
         $entityClass = ClassUtils::getClass($entity);
 
+        foreach ($this->entityToCollectionMapping as $class => $collection) {
+            if (is_a($entityClass, $class, true)) {
+                $entityClass = $class;
+                break;
+            }
+        }
+
         if (!isset($this->entityToCollectionMapping[$entityClass])) {
             throw new \Exception(sprintf('Class %s is not supported for Doctrine To Typesense Transformation', $entityClass));
         }
