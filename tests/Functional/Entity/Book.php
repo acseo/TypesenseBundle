@@ -10,13 +10,15 @@ class Book
     private $title;
     private $author;
     private $publishedAt;
+    private $active;
 
-    public function __construct($id, string $title, $author, \DateTimeInterface $publishedAt)
+    public function __construct($id, string $title, $author, \DateTimeInterface $publishedAt, bool $active = false)
     {
         $this->id          = $id;
         $this->title       = $title;
         $this->author      = $author;
         $this->publishedAt = $publishedAt;
+        $this->active      = $active;
     }
 
     /**
@@ -87,6 +89,24 @@ class Book
     public function setPublishedAt($publishedAt): self
     {
         $this->publishedAt = $publishedAt;
+
+        return $this;
+    }
+
+    /**
+     * Get the value of active.
+     */
+    public function getActive()
+    {
+        return $this->active;
+    }
+
+    /**
+     * Get the value of active.
+     */
+    public function setActive(bool $active)
+    {
+        $this->active = $active;
 
         return $this;
     }
