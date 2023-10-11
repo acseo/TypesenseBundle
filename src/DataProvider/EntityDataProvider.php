@@ -4,7 +4,7 @@ namespace ACSEO\TypesenseBundle\DataProvider;
 
 use Doctrine\ORM\EntityManagerInterface;
 
-readonly class EntityDataProvider implements DataProvider
+class EntityDataProvider implements ContextAwareDataProvider
 {
     private EntityManagerInterface $em;
 
@@ -19,5 +19,10 @@ readonly class EntityDataProvider implements DataProvider
             ->setFirstResult(($page - 1) * $maxPerPage)
             ->setMaxResults($maxPerPage)
             ->toIterable();
+    }
+    
+    public function supports(string $className): bool
+    {
+        return $this->em->getMetadataFactory()->hasMetadataFor($className);
     }
 }

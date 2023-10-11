@@ -6,8 +6,6 @@ namespace ACSEO\TypesenseBundle\Transformer;
 
 abstract class AbstractTransformer implements Transformer
 {
-    protected array $entityToCollectionMapping;
-    protected array $collectionDefinitions;
     public const TYPE_COLLECTION   = 'collection';
     public const TYPE_DATETIME     = 'datetime';
     public const TYPE_PRIMARY      = 'primary';
@@ -18,6 +16,8 @@ abstract class AbstractTransformer implements Transformer
     public const TYPE_INT_64       = 'int64';
     public const TYPE_BOOL         = 'bool';
 
+    protected array $entityToCollectionMapping;
+    protected array $collectionDefinitions;
 
     /**
      * map a type to a typesense type field.

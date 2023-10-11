@@ -9,7 +9,7 @@ use Doctrine\Common\Util\ClassUtils;
 use Symfony\Component\PropertyAccess\Exception\RuntimeException;
 use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
 
-class ArrayToTypesenseTransformer extends AbstractTransformer implements Transformer
+class ArrayToTypesenseTransformer extends AbstractTransformer implements ContextAwareTransformer
 {
     public function __construct(array $collectionDefinitions)
     {
@@ -23,10 +23,6 @@ class ArrayToTypesenseTransformer extends AbstractTransformer implements Transfo
 
     public function convert($element,string $className = null): array
     {
-        if(!is_array($element)){
-            throw new \Exception(sprintf('Data must be an array'));
-        }
-
         foreach ($this->entityToCollectionMapping as $class => $collection) {
             if (is_a($className, $class, true)) {
                 $className = $class;
@@ -59,5 +55,10 @@ class ArrayToTypesenseTransformer extends AbstractTransformer implements Transfo
         }
 
         return $data;
+    }
+
+    public function supports(mixed $element, string $className = null)
+    {
+        return is_array($element) && $className !== null && isset($this->entityToCollectionMapping[$className]);
     }
 }

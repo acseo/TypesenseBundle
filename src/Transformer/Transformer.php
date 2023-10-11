@@ -12,13 +12,4 @@ interface Transformer
      */
     public function convert($element, string $className): array;
 
-    /**
-     * Convert a value to an acceptable value for typesense.
-     *
-     * @param string $objectClass the object class name
-     * @param string $properyName the property of the object
-     * @param [type] $value the value to convert
-     */
-    public function castValue(string $objectClass, string $properyName, $value);
-
 }

@@ -9,7 +9,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\PropertyAccess\Exception\RuntimeException;
 use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
 
-class DoctrineToTypesenseTransformer extends AbstractTransformer
+class DoctrineToTypesenseTransformer extends AbstractTransformer implements ContextAwareTransformer
 {
     private $accessor;
     private $container;
@@ -26,7 +26,7 @@ class DoctrineToTypesenseTransformer extends AbstractTransformer
         }
     }
 
-    public function convert($element, string $className): array
+    public function convert($entity, string $className): array
     {
         $entityClass = ClassUtils::getClass($entity);
 
@@ -85,5 +85,10 @@ class DoctrineToTypesenseTransformer extends AbstractTransformer
         }
 
         return null;
+    }
+
+    public function supports(mixed $element, string $className = null)
+    {
+        return is_object($element) && $className !== null && isset($this->entityToCollectionMapping[$className]);
     }
 }
