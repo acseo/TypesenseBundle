@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace ACSEO\TypesenseBundle\Tests\Transformer;
 
 use ACSEO\TypesenseBundle\Tests\Functional\Entity\Book;
+use ACSEO\TypesenseBundle\Tests\Functional\Entity\BookOnline;
 use ACSEO\TypesenseBundle\Tests\Functional\Entity\Author;
 use ACSEO\TypesenseBundle\Transformer\DoctrineToTypesenseTransformer;
 use Symfony\Component\PropertyAccess\PropertyAccess;
@@ -45,6 +46,41 @@ class DoctrineToTypesenseTransformerTest extends TestCase
             ],
             $transformer->convert($book)
         );          
+    }
+
+    public function testChildConvert()
+    {
+        $collectionDefinitions = $this->getCollectionDefinitions(Book::class);
+        $propertyAccessor      = PropertyAccess::createPropertyAccessor();
+        $transformer           = new DoctrineToTypesenseTransformer($collectionDefinitions, $propertyAccessor);
+
+        $book                  = new BookOnline(1, 'test', new Author('Nicolas Potier', 'France'), new \Datetime('02/10/1984'));
+        $book->setUrl('https://www.acseo.fr');
+        self::assertEquals(
+            [
+                "id" => "1",
+                "sortable_id" => 1,
+                "title" => "test",
+                "author" => "Nicolas Potier",
+                "author_country" => "France",
+                "published_at" => 445219200
+            ],
+            $transformer->convert($book)
+        );
+
+        $book                  = new Book(1, 'test', new Author('Nicolas Potier', 'France'), new \DateTimeImmutable('02/10/1984'));
+
+        self::assertEquals(
+            [
+                "id" => "1",
+                "sortable_id" => 1,
+                "title" => "test",
+                "author" => "Nicolas Potier",
+                "author_country" => "France",
+                "published_at" => 445219200
+            ],
+            $transformer->convert($book)
+        );
     }
 
     public function testCastValueDatetime()
