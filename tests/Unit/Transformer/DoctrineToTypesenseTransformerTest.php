@@ -14,38 +14,72 @@ use PHPUnit\Framework\TestCase;
 class DoctrineToTypesenseTransformerTest extends TestCase
 {
 
-    public function testConvert()
+
+    /**
+     * @dataProvider bookData
+     */
+    public function testConvert($book, $expectedResult)
     {
         $collectionDefinitions = $this->getCollectionDefinitions(Book::class);
-        $propertyAccessor      = PropertyAccess::createPropertyAccessor();
-        $transformer           = new DoctrineToTypesenseTransformer($collectionDefinitions, $propertyAccessor);
+        $propertyAccessor = PropertyAccess::createPropertyAccessor();
+        $transformer = new DoctrineToTypesenseTransformer($collectionDefinitions, $propertyAccessor);
 
-        $book                  = new Book(1, 'test', new Author('Nicolas Potier', 'France'), new \Datetime('02/10/1984'));
-        self::assertEquals(
-            [
-                "id" => "1",
-                "sortable_id" => 1,
-                "title" => "test",
-                "author" => "Nicolas Potier",
-                "author_country" => "France",
-                "published_at" => 445219200
-            ],
-            $transformer->convert($book)
-        );   
-        
-        $book                  = new Book(1, 'test', new Author('Nicolas Potier', 'France'), new \DateTimeImmutable('02/10/1984'));
+        self::assertEquals($expectedResult, $transformer->convert($book));
+    }
 
-        self::assertEquals(
+    public function bookData()
+    {
+        return [
             [
-                "id" => "1",
-                "sortable_id" => 1,
-                "title" => "test",
-                "author" => "Nicolas Potier",
-                "author_country" => "France",
-                "published_at" => 445219200
+                new Book(1, 'test', new Author('Nicolas Potier', 'France'), new \Datetime('01/01/1984 00:00:00')),
+                [
+                    "id" => "1",
+                    "sortable_id" => 1,
+                    "title" => "test",
+                    "author" => "Nicolas Potier",
+                    "author_country" => "France",
+                    "published_at" => 441763200,
+                    "active" => false
+                ]
             ],
-            $transformer->convert($book)
-        );          
+            [
+                new Book(1, 'test', new Author('Nicolas Potier', 'France'), new \DateTimeImmutable('01/01/1984 00:00:00')),
+                [
+                    "id" => "1",
+                    "sortable_id" => 1,
+                    "title" => "test",
+                    "author" => "Nicolas Potier",
+                    "author_country" => "France",
+                    "published_at" => 441763200,
+                    "active" => false
+                ]
+            ],
+            [
+                new Book(1, 'test', new Author('Nicolas Potier', 'France'), new \DateTimeImmutable('01/01/1984 00:00:00'), 'this string will return true'),
+                [
+                    "id" => "1",
+                    "sortable_id" => 1,
+                    "title" => "test",
+                    "author" => "Nicolas Potier",
+                    "author_country" => "France",
+                    "published_at" => 441763200,
+                    "active" => true
+                ]
+            ],
+            [
+                new Book(1, 'test', new Author('Nicolas Potier', 'France'), new \DateTimeImmutable('01/01/1984 00:00:00'), '0'),
+                [
+                    "id" => "1",
+                    "sortable_id" => 1,
+                    "title" => "test",
+                    "author" => "Nicolas Potier",
+                    "author_country" => "France",
+                    "published_at" => 441763200,
+                    "active" => false
+                ]
+            ]            
+
+        ];
     }
 
     public function testChildConvert()
@@ -54,8 +88,9 @@ class DoctrineToTypesenseTransformerTest extends TestCase
         $propertyAccessor      = PropertyAccess::createPropertyAccessor();
         $transformer           = new DoctrineToTypesenseTransformer($collectionDefinitions, $propertyAccessor);
 
-        $book                  = new BookOnline(1, 'test', new Author('Nicolas Potier', 'France'), new \Datetime('02/10/1984'));
+        $book                  = new BookOnline(1, 'test', new Author('Nicolas Potier', 'France'), new \Datetime('01/01/1984 00:00:00'));
         $book->setUrl('https://www.acseo.fr');
+
         self::assertEquals(
             [
                 "id" => "1",
@@ -63,12 +98,13 @@ class DoctrineToTypesenseTransformerTest extends TestCase
                 "title" => "test",
                 "author" => "Nicolas Potier",
                 "author_country" => "France",
-                "published_at" => 445219200
+                "published_at" => 441763200,
+                'active' => false
             ],
             $transformer->convert($book)
         );
 
-        $book                  = new Book(1, 'test', new Author('Nicolas Potier', 'France'), new \DateTimeImmutable('02/10/1984'));
+        $book                  = new Book(1, 'test', new Author('Nicolas Potier', 'France'), new \DateTimeImmutable('01/01/1984 00:00:00'));
 
         self::assertEquals(
             [
@@ -77,7 +113,8 @@ class DoctrineToTypesenseTransformerTest extends TestCase
                 "title" => "test",
                 "author" => "Nicolas Potier",
                 "author_country" => "France",
-                "published_at" => 445219200
+                "published_at" => 441763200,
+                'active' => false
             ],
             $transformer->convert($book)
         );
@@ -89,11 +126,11 @@ class DoctrineToTypesenseTransformerTest extends TestCase
         $propertyAccessor      = PropertyAccess::createPropertyAccessor();
         $transformer           = new DoctrineToTypesenseTransformer($collectionDefinitions, $propertyAccessor);
         //Datetime
-        $value                  = $transformer->castValue(Book::class, 'published_at', new \Datetime('02/10/1984'));
-        self::assertEquals(445219200, $value);
+        $value                  = $transformer->castValue(Book::class, 'published_at', new \Datetime('01/01/1984 00:00:00'));
+        self::assertEquals(441763200, $value);
         //DatetimeImmutable
-        $value                  = $transformer->castValue(Book::class, 'published_at', new \DatetimeImmutable('02/10/1984'));
-        self::assertEquals(445219200, $value);
+        $value                  = $transformer->castValue(Book::class, 'published_at', new \DatetimeImmutable('01/01/1984 00:00:00'));
+        self::assertEquals(441763200, $value);
     }
 
     public function testCastValueObject()
@@ -101,7 +138,7 @@ class DoctrineToTypesenseTransformerTest extends TestCase
         $collectionDefinitions = $this->getCollectionDefinitions(Book::class);
         $propertyAccessor      = PropertyAccess::createPropertyAccessor();
         $transformer           = new DoctrineToTypesenseTransformer($collectionDefinitions, $propertyAccessor);
-        
+
         // Conversion OK
         $author                 = new Author('Nicolas Potier', 'France');
         $value                  = $transformer->castValue(Book::class, 'author', $author);
@@ -144,6 +181,11 @@ class DoctrineToTypesenseTransformerTest extends TestCase
                         'name'             => 'author_country',
                         'type'             => 'string',
                         'entity_attribute' => 'author.country',
+                    ],
+                    'active' => [
+                        'name'             => 'active',
+                        'type'             => 'bool',
+                        'entity_attribute' => 'active'
                     ],
                     'publishedAt' => [
                         'name'             => 'published_at',
