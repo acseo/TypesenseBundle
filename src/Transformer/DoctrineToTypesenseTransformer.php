@@ -98,6 +98,8 @@ class DoctrineToTypesenseTransformer extends AbstractTransformer
             case self::TYPE_STRING.self::TYPE_STRING:
             case self::TYPE_PRIMARY.self::TYPE_STRING:
                 return (string) $value;
+            case self::TYPE_BOOL.self::TYPE_BOOL:
+                return $value;
             default:
                 return $value;
         }
