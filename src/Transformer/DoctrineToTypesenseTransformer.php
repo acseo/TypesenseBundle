@@ -32,6 +32,16 @@ class DoctrineToTypesenseTransformer extends AbstractTransformer
     {
         $entityClass = ClassUtils::getClass($entity);
 
+        // See : https://github.com/acseo/TypesenseBundle/pull/91
+        // Allow subclasses to be recognized as a parent class
+        foreach (array_keys($this->entityToCollectionMapping) as $class) {
+            if (is_a($entityClass, $class, true)) {
+                $entityClass = $class;
+                break;
+            }
+        }
+        
+
         if (!isset($this->entityToCollectionMapping[$entityClass])) {
             throw new \Exception(sprintf('Class %s is not supported for Doctrine To Typesense Transformation', $entityClass));
         }
@@ -97,6 +107,8 @@ class DoctrineToTypesenseTransformer extends AbstractTransformer
             case self::TYPE_STRING.self::TYPE_STRING:
             case self::TYPE_PRIMARY.self::TYPE_STRING:
                 return (string) $value;
+            case self::TYPE_BOOL.self::TYPE_BOOL:
+                return (bool) $value;
             default:
                 return $value;
         }

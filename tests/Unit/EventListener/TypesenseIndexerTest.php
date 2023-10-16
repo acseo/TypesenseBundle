@@ -64,7 +64,8 @@ class TypesenseIndexerTest extends TestCase
             'title' => 'The Doors of Perception',
             'author' => 'Aldoux Huxley',
             'author_country' => 'United Kingdom',
-            'published_at' => -504921600,
+            'published_at' => -504892800,
+            'active' => false
         ])->shouldHaveBeenCalled();
     }
 
@@ -115,6 +116,11 @@ class TypesenseIndexerTest extends TestCase
                         'optional'         => true,
                         'entity_attribute' => 'publishedAt',
                     ],
+                    'active' => [
+                        'name'             => 'active',
+                        'type'             => 'bool',
+                        'entity_attribute' => 'active',
+                    ]
                 ],
                 'default_sorting_field' => 'sortable_id',
             ],
