@@ -99,7 +99,7 @@ class DoctrineToTypesenseTransformer extends AbstractTransformer
             case self::TYPE_PRIMARY.self::TYPE_STRING:
                 return (string) $value;
             case self::TYPE_BOOL.self::TYPE_BOOL:
-                return $value;
+                return (bool) $value;
             default:
                 return $value;
         }

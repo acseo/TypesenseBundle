@@ -12,7 +12,7 @@ class Book
     private $publishedAt;
     private $active;
 
-    public function __construct($id, string $title, $author, \DateTimeInterface $publishedAt, bool $active = false)
+    public function __construct($id, string $title, $author, \DateTimeInterface $publishedAt, $active = false)
     {
         $this->id          = $id;
         $this->title       = $title;
