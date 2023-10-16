@@ -15,6 +15,7 @@ use Doctrine\Persistence\Event\LifecycleEventArgs;
 use Doctrine\Persistence\ObjectManager;
 use PHPUnit\Framework\TestCase;
 use Prophecy\PhpUnit\ProphecyTrait;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 
 class TypesenseIndexerTest extends TestCase
@@ -25,11 +26,12 @@ class TypesenseIndexerTest extends TestCase
     {
         $this->objectManager = $this->prophesize(ObjectManager::class);
         $this->propertyAccessor = PropertyAccess::createPropertyAccessor();
+        $this->container = $this->prophesize(ContainerInterface::class);
     }
 
     private function initialize($collectionDefinitions)
     {
-        $transformer = new DoctrineToTypesenseTransformer($collectionDefinitions, $this->propertyAccessor);
+        $transformer = new DoctrineToTypesenseTransformer($collectionDefinitions, $this->propertyAccessor, $this->container->reveal());
 
         $collectionClient = $this->prophesize(CollectionClient::class);
 
