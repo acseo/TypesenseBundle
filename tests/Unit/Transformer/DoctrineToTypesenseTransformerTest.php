@@ -7,7 +7,10 @@ namespace ACSEO\TypesenseBundle\Tests\Transformer;
 use ACSEO\TypesenseBundle\Tests\Functional\Entity\Book;
 use ACSEO\TypesenseBundle\Tests\Functional\Entity\BookOnline;
 use ACSEO\TypesenseBundle\Tests\Functional\Entity\Author;
+use ACSEO\TypesenseBundle\Tests\Functional\Service\BookConverter;
+use ACSEO\TypesenseBundle\Tests\Functional\Service\ExceptionBookConverter;
 use ACSEO\TypesenseBundle\Transformer\DoctrineToTypesenseTransformer;
+use Symfony\Component\DependencyInjection\Container;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use PHPUnit\Framework\TestCase;
 
@@ -22,7 +25,8 @@ class DoctrineToTypesenseTransformerTest extends TestCase
     {
         $collectionDefinitions = $this->getCollectionDefinitions(Book::class);
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
-        $transformer = new DoctrineToTypesenseTransformer($collectionDefinitions, $propertyAccessor);
+        $container             = $this->getContainerInstance();
+        $transformer = new DoctrineToTypesenseTransformer($collectionDefinitions, $propertyAccessor, $container);
 
         self::assertEquals($expectedResult, $transformer->convert($book));
     }
@@ -39,7 +43,8 @@ class DoctrineToTypesenseTransformerTest extends TestCase
                     "author" => "Nicolas Potier",
                     "author_country" => "France",
                     "published_at" => 441763200,
-                    "active" => false
+                    "active" => false,
+                    "cover_image_url" => "http://fake.image/1"
                 ]
             ],
             [
@@ -51,7 +56,8 @@ class DoctrineToTypesenseTransformerTest extends TestCase
                     "author" => "Nicolas Potier",
                     "author_country" => "France",
                     "published_at" => 441763200,
-                    "active" => false
+                    "active" => false,
+                    "cover_image_url" => "http://fake.image/1"
                 ]
             ],
             [
@@ -63,7 +69,8 @@ class DoctrineToTypesenseTransformerTest extends TestCase
                     "author" => "Nicolas Potier",
                     "author_country" => "France",
                     "published_at" => 441763200,
-                    "active" => true
+                    "active" => true,
+                    "cover_image_url" => "http://fake.image/1"
                 ]
             ],
             [
@@ -75,7 +82,8 @@ class DoctrineToTypesenseTransformerTest extends TestCase
                     "author" => "Nicolas Potier",
                     "author_country" => "France",
                     "published_at" => 441763200,
-                    "active" => false
+                    "active" => false,
+                    "cover_image_url" => "http://fake.image/1"
                 ]
             ]            
 
@@ -86,7 +94,8 @@ class DoctrineToTypesenseTransformerTest extends TestCase
     {
         $collectionDefinitions = $this->getCollectionDefinitions(Book::class);
         $propertyAccessor      = PropertyAccess::createPropertyAccessor();
-        $transformer           = new DoctrineToTypesenseTransformer($collectionDefinitions, $propertyAccessor);
+        $container             = $this->getContainerInstance();
+        $transformer           = new DoctrineToTypesenseTransformer($collectionDefinitions, $propertyAccessor, $container);
 
         $book                  = new BookOnline(1, 'test', new Author('Nicolas Potier', 'France'), new \Datetime('01/01/1984 00:00:00'));
         $book->setUrl('https://www.acseo.fr');
@@ -99,6 +108,7 @@ class DoctrineToTypesenseTransformerTest extends TestCase
                 "author" => "Nicolas Potier",
                 "author_country" => "France",
                 "published_at" => 441763200,
+                "cover_image_url" => "http://fake.image/1",
                 'active' => false
             ],
             $transformer->convert($book)
@@ -113,6 +123,7 @@ class DoctrineToTypesenseTransformerTest extends TestCase
                 "title" => "test",
                 "author" => "Nicolas Potier",
                 "author_country" => "France",
+                "cover_image_url" => "http://fake.image/1",
                 "published_at" => 441763200,
                 'active' => false
             ],
@@ -124,7 +135,8 @@ class DoctrineToTypesenseTransformerTest extends TestCase
     {
         $collectionDefinitions = $this->getCollectionDefinitions(Book::class);
         $propertyAccessor      = PropertyAccess::createPropertyAccessor();
-        $transformer           = new DoctrineToTypesenseTransformer($collectionDefinitions, $propertyAccessor);
+        $container             = $this->getContainerInstance();
+        $transformer           = new DoctrineToTypesenseTransformer($collectionDefinitions, $propertyAccessor, $container);
         //Datetime
         $value                  = $transformer->castValue(Book::class, 'published_at', new \Datetime('01/01/1984 00:00:00'));
         self::assertEquals(441763200, $value);
@@ -137,7 +149,8 @@ class DoctrineToTypesenseTransformerTest extends TestCase
     {
         $collectionDefinitions = $this->getCollectionDefinitions(Book::class);
         $propertyAccessor      = PropertyAccess::createPropertyAccessor();
-        $transformer           = new DoctrineToTypesenseTransformer($collectionDefinitions, $propertyAccessor);
+        $container             = $this->getContainerInstance();
+        $transformer           = new DoctrineToTypesenseTransformer($collectionDefinitions, $propertyAccessor, $container);
 
         // Conversion OK
         $author                 = new Author('Nicolas Potier', 'France');
@@ -147,6 +160,55 @@ class DoctrineToTypesenseTransformerTest extends TestCase
         // Conversion KO
         $this->expectExceptionMessage('Call to undefined method ArrayObject::__toString()');
         $value                  = $transformer->castValue(Book::class, 'author', new \ArrayObject());
+    }
+
+
+    public function testCastValueViaService()
+    {
+        $collectionDefinitions = $this->getCollectionDefinitions(Book::class);
+        $propertyAccessor = PropertyAccess::createPropertyAccessor();
+        $container             = $this->getContainerInstance();
+        $transformer = new DoctrineToTypesenseTransformer($collectionDefinitions, $propertyAccessor, $container);
+
+        $book = new Book(1, 'test', new Author('Nicolas Potier', 'France'), new \Datetime('01/01/1984 00:00:00'));
+        $expectedResult = [
+            "id" => "1",
+            "sortable_id" => 1,
+            "title" => "test",
+            "author" => "Nicolas Potier",
+            "author_country" => "France",
+            "published_at" => 441763200,
+            "active" => false,
+            "cover_image_url" => "http://fake.image/1"
+        ];
+        self::assertEquals($expectedResult, $transformer->convert($book));
+
+        // Override collectionDefinition to declare a wrong service converter
+        $collectionDefinitions['books']['fields']['cover_image_url']['entity_attribute'] = 'This service does not exists';
+        $transformer = new DoctrineToTypesenseTransformer($collectionDefinitions, $propertyAccessor, $container);
+        $expectedResult = [
+            "id" => "1",
+            "sortable_id" => 1,
+            "title" => "test",
+            "author" => "Nicolas Potier",
+            "author_country" => "France",
+            "published_at" => 441763200,
+            "active" => false,
+            "cover_image_url" => null
+        ];
+        
+        self::assertEquals($expectedResult, $transformer->convert($book));
+        
+        // Override collectionDefinition to declare a service that throws exception
+        $collectionDefinitions['books']['fields']['cover_image_url']['entity_attribute'] = 'ACSEO\TypesenseBundle\Tests\Functional\Service\ExceptionBookConverter::getCoverImageURL';
+        $transformer = new DoctrineToTypesenseTransformer($collectionDefinitions, $propertyAccessor, $container);
+        $this->expectExceptionMessage("I'm trowing an exception during conversion");
+        $result = $transformer->convert($book);
+
+        // Override collectionDefinition to declare a service that throws exception
+        $collectionDefinitions['books']['fields']['cover_image_url']['entity_attribute'] = 'ACSEO\TypesenseBundle\Tests\Functional\Service\BookConverter::thisMethodDoesNotExists';
+        $transformer = new DoctrineToTypesenseTransformer($collectionDefinitions, $propertyAccessor, $container);
+        self::assertEquals($expectedResult, $transformer->convert($book));
     }
 
     private function getCollectionDefinitions($entityClass)
@@ -193,9 +255,23 @@ class DoctrineToTypesenseTransformerTest extends TestCase
                         'optional'         => true,
                         'entity_attribute' => 'publishedAt',
                     ],
+                    'cover_image_url' => [
+                        'name'             => 'cover_image_url',
+                        'type'             => 'string',
+                        'optional'         => true,
+                        'entity_attribute' => 'ACSEO\TypesenseBundle\Tests\Functional\Service\BookConverter::getCoverImageURL',
+                    ]
                 ],
                 'default_sorting_field' => 'sortable_id',
             ],
         ];
+    }
+
+    private function getContainerInstance()
+    {
+        $containerInstance = new Container();
+        $containerInstance->set('ACSEO\TypesenseBundle\Tests\Functional\Service\BookConverter', new BookConverter());
+        $containerInstance->set('ACSEO\TypesenseBundle\Tests\Functional\Service\ExceptionBookConverter', new ExceptionBookConverter());
+        return $containerInstance;
     }
 }

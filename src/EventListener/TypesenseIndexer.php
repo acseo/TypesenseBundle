@@ -15,6 +15,7 @@ class TypesenseIndexer
     private $collectionManager;
     private $transformer;
     private $managedClassNames;
+    private DocumentManager $documentManager;
 
     private $objetsIdThatCanBeDeletedByObjectHash = [];
     private $documentsToIndex                     = [];
@@ -31,7 +32,6 @@ class TypesenseIndexer
         $this->transformer       = $transformer;
 
         $this->managedClassNames  = $this->collectionManager->getManagedClassNames();
-        $this->objectsIDsToDelete = [];
     }
 
     public function postPersist(LifecycleEventArgs $args)
