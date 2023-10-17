@@ -22,6 +22,12 @@ class TypesenseIndexerTest extends TestCase
 {
     use ProphecyTrait;
 
+    private $objectManager;
+    private $propertyAccessor;
+    private $container;
+    private $eventListener;
+    private $documentManager;
+    
     public function setUp(): void
     {
         $this->objectManager = $this->prophesize(ObjectManager::class);
@@ -50,7 +56,7 @@ class TypesenseIndexerTest extends TestCase
 
         $this->initialize($collectionDefinitions);
 
-        $book = new Book(1, 'The Doors of Perception', new Author('Aldoux Huxley', 'United Kingdom'), new \DateTime('1954-01-01'));
+        $book = new Book(1, 'The Doors of Perception', new Author('Aldoux Huxley', 'United Kingdom'), new \DateTime('01/01/1984 00:00:00'));
 
         $eventArgs = new LifecycleEventArgs($book, $this->objectManager->reveal());
 
@@ -64,7 +70,7 @@ class TypesenseIndexerTest extends TestCase
             'title' => 'The Doors of Perception',
             'author' => 'Aldoux Huxley',
             'author_country' => 'United Kingdom',
-            'published_at' => -504892800,
+            'published_at' => 441763200,
             'active' => false
         ])->shouldHaveBeenCalled();
     }

@@ -84,6 +84,12 @@ acseo_typesense:
                     name: publishedAt
                     type: datetime
                     optional: true                   # Declare field as optional
+                cover_image_url:
+                    name: cover_image_url
+                    type: string
+                    optional: true
+                    entity_attribute: ACSEO\Service\BookConverter::getCoverImageURL # use a service converter instead of an attribute
+
             default_sorting_field: sortable_id       # Default sorting field. Must be int32 or float
             symbols_to_index: ['+']                  # Optional - You can add + to this list to make the word c++ indexable verbatim.
         users:

@@ -4,14 +4,14 @@ namespace ACSEO\TypesenseBundle\Tests\Functional\Service;
 
 use ACSEO\TypesenseBundle\Tests\Functional\Entity\Book;
 
-class BookConverter
+class ExceptionBookConverter
 {
     /**
      * In a real life example maybe you would need to call some extra service to get this URL
      * and that service can be injected with DI into this one
      */
-    public function getCoverImageURL(Book $book) : string
+    public function getCoverImageURL($book) : string
     {
-        return sprintf('http://fake.image/%d', $book->getId());
+        throw new \Exception("I'm trowing an exception during conversion");
     }
 }

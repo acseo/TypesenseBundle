@@ -42,6 +42,8 @@ class TypesenseInteractionsTest extends KernelTestCase
         'La chute du monstre',
     ];
 
+    private $cptToIterableCall;
+    
     public function testCreateCommand()
     {
         $commandTester = $this->createCommandTester();
