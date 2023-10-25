@@ -28,12 +28,12 @@ class DoctrineToTypesenseTransformer extends AbstractTransformer implements Cont
 
     public function convert($entity, string $className): array
     {
-        $entityClass = ClassUtils::getClass($entity);
+        $entityClass = $className;
 
         // See : https://github.com/acseo/TypesenseBundle/pull/91
         // Allow subclasses to be recognized as a parent class
         foreach (array_keys($this->entityToCollectionMapping) as $class) {
-            if (is_a($entityClass, $class, true)) {
+            if (is_a($className, $class, true)) {
                 $entityClass = $class;
                 break;
             }
@@ -46,7 +46,7 @@ class DoctrineToTypesenseTransformer extends AbstractTransformer implements Cont
 
         $data = [];
 
-        $fields = $this->collectionDefinitions[$this->entityToCollectionMapping[$className]]['fields'];
+        $fields = $this->collectionDefinitions[$this->entityToCollectionMapping[$entityClass]]['fields'];
 
         foreach ($fields as $fieldsInfo) {
             $entityAttribute = $fieldsInfo['entity_attribute'];
