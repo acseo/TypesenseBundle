@@ -43,7 +43,7 @@ class TypesenseIndexer
         }
 
         $collection  = $this->getCollectionName($entity);
-        $entityClass = ClassUtils::getRealClass($entity);
+        $entityClass = ClassUtils::getClass($entity);
         $data        = $this->transformer->convert($entity, $entityClass);
 
         $this->documentsToIndex[] = [$collection, $data];
