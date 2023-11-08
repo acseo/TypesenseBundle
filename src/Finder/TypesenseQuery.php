@@ -66,6 +66,14 @@ class TypesenseQuery
     }
 
     /**
+     * A list of fields that will be used for querying your results on. Separate multiple fields with a comma.
+     */
+    public function infix(string $infix): self
+    {
+        return $this->addParameter('infix', $infix);
+    }
+
+    /**
      * A list of fields that will be used for faceting your results on. Separate multiple fields with a comma.
      */
     public function facetBy(string $facetBy): self
