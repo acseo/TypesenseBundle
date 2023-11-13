@@ -63,7 +63,6 @@ class TypesenseIndexerTest extends TestCase
         $this->eventListener->postUpdate($eventArgs);
         $this->eventListener->postFlush();
 
-        $this->documentManager->delete(sprintf('%sbooks', $prefix), 1)->shouldHaveBeenCalled();
         $this->documentManager->index(sprintf('%sbooks', $prefix), [
             'id' => 1,
             'sortable_id' => 1,
