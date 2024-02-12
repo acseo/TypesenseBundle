@@ -26,19 +26,25 @@ class CollectionFinder implements CollectionFinderInterface
         return $this->search($query);
     }
 
-    public function query(TypesenseQuery $query)
+    public function query(TypesenseQuery $query): TypesenseResponse
     {
         $results = $this->search($query);
 
         return $this->hydrate($results);
     }
 
-    public function hydrateResponse(TypesenseResponse $response)
+    public function hydrateResponse(TypesenseResponse $response) : TypesenseResponse
     {
         return $this->hydrate($response);
     }
 
-    private function hydrate($results)
+    /**
+     * Add database entities to Typesense Response
+     *
+     * @param TypesenseResponse $results
+     * @return TypesenseResponse
+     */
+    private function hydrate(TypesenseResponse $results) : TypesenseResponse
     {
         $ids             = [];
         $primaryKeyInfos = $this->getPrimaryKeyInfo();
@@ -60,7 +66,7 @@ class CollectionFinder implements CollectionFinderInterface
         return $results;
     }
 
-    private function search(TypesenseQuery $query)
+    private function search(TypesenseQuery $query) : TypesenseResponse
     {
         $result = $this->collectionClient->search($this->collectionConfig['typesense_name'], $query);
 
