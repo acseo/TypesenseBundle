@@ -33,6 +33,11 @@ class CollectionFinder implements CollectionFinderInterface
         return $this->hydrate($results);
     }
 
+    public function hydrateResponse(TypesenseResponse $response)
+    {
+        return $this->hydrate($response);
+    }
+
     private function hydrate($results)
     {
         $ids             = [];
