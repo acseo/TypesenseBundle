@@ -25,6 +25,7 @@ class TypesenseQueryTest extends TestCase
             ->prefix(false)
             ->filterBy('filter term')
             ->sortBy('sort term')
+            ->infix('off')
             ->facetBy('facet term')
             ->maxFacetValues(10)
             ->numTypos(0)
@@ -42,6 +43,7 @@ class TypesenseQueryTest extends TestCase
                 'prefix'                => false,
                 'filter_by'             => 'filter term',
                 'sort_by'               => 'sort term',
+                'infix'                 => 'off',
                 'facet_by'              => 'facet term',
                 'max_facet_values'      => 10,
                 'num_typos'             => 0,
