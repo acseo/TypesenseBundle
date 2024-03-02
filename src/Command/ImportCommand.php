@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace ACSEO\TypesenseBundle\Command;
 
+use ACSEO\TypesenseBundle\DataProvider\DataProvider;
 use ACSEO\TypesenseBundle\Manager\CollectionManager;
 use ACSEO\TypesenseBundle\Manager\DocumentManager;
-use ACSEO\TypesenseBundle\Transformer\DoctrineToTypesenseTransformer;
+use ACSEO\TypesenseBundle\Transformer\Transformer;
+use Doctrine\Common\Util\ClassUtils;
+use Doctrine\ORM\AbstractQuery;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -22,6 +25,7 @@ class ImportCommand extends Command
     private $collectionManager;
     private $documentManager;
     private $transformer;
+    private $dataProvider;
     private const ACTIONS = [
         'create',
         'upsert',
@@ -33,13 +37,15 @@ class ImportCommand extends Command
         EntityManagerInterface $em,
         CollectionManager $collectionManager,
         DocumentManager $documentManager,
-        DoctrineToTypesenseTransformer $transformer
+        Transformer $transformer,
+        DataProvider $dataProvider
     ) {
         parent::__construct();
         $this->em                = $em;
         $this->collectionManager = $collectionManager;
         $this->documentManager   = $documentManager;
         $this->transformer       = $transformer;
+        $this->dataProvider      = $dataProvider;
     }
 
     protected function configure()
@@ -64,8 +70,6 @@ class ImportCommand extends Command
 
             return 1;
         }
-
-        $action = $input->getOption('action');
 
         // 'setMiddlewares' method only exists for Doctrine version >=3.0.0
         if (method_exists($this->em->getConnection()->getConfiguration(), 'setMiddlewares')) {
@@ -126,8 +130,8 @@ class ImportCommand extends Command
         $collectionDefinition  = $collectionDefinitions[$index];
         $action                = $input->getOption('action');
 
-        $firstPage  = $input->getOption('first-page');
-        $maxPerPage = $input->getOption('max-per-page');
+        $firstPage  = (int) $input->getOption('first-page');
+        $maxPerPage = (int) $input->getOption('max-per-page');
 
         $collectionName = $collectionDefinition['typesense_name'];
         $class          = $collectionDefinition['entity'];
@@ -151,21 +155,14 @@ class ImportCommand extends Command
 
         $io->text('<info>['.$collectionName.'] '.$class.'</info> '.$nbEntities.' entries to insert splited into '.$nbPages.' pages of '.$maxPerPage.' elements. Insertion from page '.$firstPage.' to '.$lastPage.'.');
 
+        $entityClass = ClassUtils::getRealClass($class);
+
         for ($i = $firstPage; $i <= $lastPage; ++$i) {
-            $q = $this->em->createQuery('select e from '.$class.' e')
-                ->setFirstResult(($i - 1) * $maxPerPage)
-                ->setMaxResults($maxPerPage)
-            ;
-
-            if ($io->isDebug()) {
-                $io->text('<info>Running request : </info>'.$q->getSQL());
-            }
-
-            $entities = $q->toIterable();
+            $elements = $this->dataProvider->getData($class, $i, $maxPerPage);
 
             $data = [];
-            foreach ($entities as $entity) {
-                $data[] = $this->transformer->convert($entity);
+            foreach ($elements as $element) {
+                $data[] = $this->transformer->convert($element, $entityClass);
             }
 
             $io->text('Import <info>['.$collectionName.'] '.$class.'</info> Page '.$i.' of '.$lastPage.' ('.count($data).' items)');
