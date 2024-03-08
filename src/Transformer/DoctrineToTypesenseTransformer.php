@@ -89,6 +89,8 @@ class DoctrineToTypesenseTransformer extends AbstractTransformer
         $originalType                = $collectionFieldsDefinitions[$key]['type'];
         $castedType                  = $this->castType($originalType);
 
+        $isOptional = $collectionFieldsDefinitions[$key]['optional'] ?? false;
+
         switch ($originalType.$castedType) {
             case self::TYPE_DATETIME.self::TYPE_INT_64:
                 if ($value instanceof \DateTimeInterface) {
@@ -97,10 +99,16 @@ class DoctrineToTypesenseTransformer extends AbstractTransformer
 
                 return null;
             case self::TYPE_OBJECT.self::TYPE_STRING:
+                if ($isOptional == true && $value == null) {
+                    return null;
+                }
                 return $value->__toString();
             case self::TYPE_COLLECTION.self::TYPE_ARRAY_STRING:
                 return array_values(
-                    $value->map(function ($v) {
+                    $value->map(function ($v) use($isOptional) {
+                        if ($isOptional == true && $v == null) {
+                            return null;
+                        }
                         return $v->__toString();
                     })->toArray()
                 );
