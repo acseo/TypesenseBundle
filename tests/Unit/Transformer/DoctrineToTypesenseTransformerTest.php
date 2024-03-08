@@ -35,13 +35,13 @@ class DoctrineToTypesenseTransformerTest extends TestCase
     {
         return [
             [
-                new Book(1, 'test', new Author('Nicolas Potier', 'France'), new \Datetime('01/01/1984 00:00:00')),
+                new Book(1, 'test', null, new \Datetime('01/01/1984 00:00:00')),
                 [
                     "id" => "1",
                     "sortable_id" => 1,
                     "title" => "test",
-                    "author" => "Nicolas Potier",
-                    "author_country" => "France",
+                    "author" => null,
+                    "author_country" => null,
                     "published_at" => 441763200,
                     "active" => false,
                     "cover_image_url" => "http://fake.image/1"
@@ -238,6 +238,7 @@ class DoctrineToTypesenseTransformerTest extends TestCase
                         'name'             => 'author',
                         'type'             => 'object',
                         'entity_attribute' => 'author',
+                        'optional'         => true
                     ],
                     'michel' => [
                         'name'             => 'author_country',
