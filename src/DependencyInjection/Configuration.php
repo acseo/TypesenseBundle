@@ -30,6 +30,7 @@ class Configuration implements ConfigurationInterface
                     ->arrayPrototype()
                         ->children()
                             ->scalarNode('collection_name')->end()
+                            ->booleanNode('enable_nested_fields')->end()
                             ->scalarNode('entity')->end()
                             ->arrayNode('fields')
                                 ->arrayPrototype()
