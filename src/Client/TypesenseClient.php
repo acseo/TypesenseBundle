@@ -24,16 +24,20 @@ class TypesenseClient
             return;
         }
 
-        $urlParsed = parse_url($url);
+        $nodeUrls = explode(",", $url);
+        $nodes = [];
+
+        foreach ($nodeUrls as $nodeUrl) {
+            $urlParsed = parse_url(trim($nodeUrl));
+            $nodes[] = [
+                'host'     => $urlParsed['host'],
+                'port'     => $urlParsed['port'],
+                'protocol' => $urlParsed['scheme'],
+            ];
+        }
 
         $this->client = new Client([
-            'nodes' => [
-                [
-                    'host'     => $urlParsed['host'],
-                    'port'     => $urlParsed['port'],
-                    'protocol' => $urlParsed['scheme'],
-                ],
-            ],
+            'nodes' => $nodes,
             'api_key'                    => $apiKey,
             'connection_timeout_seconds' => 5,
         ]);
