@@ -41,6 +41,7 @@ class Configuration implements ConfigurationInterface
                                         ->booleanNode('facet')->end()
                                         ->booleanNode('infix')->end()
                                         ->booleanNode('optional')->end()
+                                        ->booleanNode('sort')->end()
                                     ->end()
                                 ->end()
                             ->end()
