@@ -24,6 +24,7 @@ use Doctrine\ORM\Event\LifecycleEventArgs;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Tester\CommandTester;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 
 /**
@@ -41,6 +42,8 @@ class TypesenseInteractionsTest extends KernelTestCase
         'La chute du monstre',
     ];
 
+    private $cptToIterableCall;
+    
     public function testCreateCommand()
     {
         $commandTester = $this->createCommandTester();
@@ -172,7 +175,8 @@ class TypesenseInteractionsTest extends KernelTestCase
         $collectionClient      = new CollectionClient($typeSenseClient);
         $collectionDefinitions = $this->getCollectionDefinitions(Book::class);
         $propertyAccessor      = PropertyAccess::createPropertyAccessor();
-        $transformer           = new DoctrineToTypesenseTransformer($collectionDefinitions, $propertyAccessor);
+        $container             = $this->createMock(ContainerInterface::class);
+        $transformer           = new DoctrineToTypesenseTransformer($collectionDefinitions, $propertyAccessor, $container);
         $collectionManager     = new CollectionManager($collectionClient, $transformer, $collectionDefinitions);
         $typeSenseClient       = new TypesenseClient($_ENV['TYPESENSE_URL'], $_ENV['TYPESENSE_KEY']);
         $documentManager       = new DocumentManager($typeSenseClient);
@@ -244,7 +248,8 @@ class TypesenseInteractionsTest extends KernelTestCase
         $typeSenseClient       = new TypesenseClient($_ENV['TYPESENSE_URL'], $_ENV['TYPESENSE_KEY']);
         $propertyAccessor      = PropertyAccess::createPropertyAccessor();
         $collectionClient      = new CollectionClient($typeSenseClient);
-        $transformer           = new DoctrineToTypesenseTransformer($collectionDefinitions, $propertyAccessor);
+        $container             = $this->createMock(ContainerInterface::class);
+        $transformer           = new DoctrineToTypesenseTransformer($collectionDefinitions, $propertyAccessor, $container);
         $collectionManager     = new CollectionManager($collectionClient, $transformer, $collectionDefinitions);
 
         $command = new CreateCommand($collectionManager);
@@ -266,7 +271,8 @@ class TypesenseInteractionsTest extends KernelTestCase
         $typeSenseClient       = new TypesenseClient($_ENV['TYPESENSE_URL'], $_ENV['TYPESENSE_KEY']);
         $propertyAccessor      = PropertyAccess::createPropertyAccessor();
         $collectionClient      = new CollectionClient($typeSenseClient);
-        $transformer           = new DoctrineToTypesenseTransformer($collectionDefinitions, $propertyAccessor);
+        $container             = $this->createMock(ContainerInterface::class);
+        $transformer           = new DoctrineToTypesenseTransformer($collectionDefinitions, $propertyAccessor, $container);
         $documentManager       = new DocumentManager($typeSenseClient);
         $collectionManager     = new CollectionManager($collectionClient, $transformer, $collectionDefinitions);
         $em                    = $this->getMockedEntityManager($books, $options);

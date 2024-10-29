@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace ACSEO\TypesenseBundle\Transformer;
 
 use Doctrine\Common\Util\ClassUtils;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\PropertyAccess\Exception\RuntimeException;
 use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
 
@@ -13,11 +14,13 @@ class DoctrineToTypesenseTransformer extends AbstractTransformer
     private $collectionDefinitions;
     private $entityToCollectionMapping;
     private $accessor;
+    private $container;
 
-    public function __construct(array $collectionDefinitions, PropertyAccessorInterface $accessor)
+    public function __construct(array $collectionDefinitions, PropertyAccessorInterface $accessor, ContainerInterface $container)
     {
         $this->collectionDefinitions = $collectionDefinitions;
         $this->accessor              = $accessor;
+        $this->container              = $container;
 
         $this->entityToCollectionMapping = [];
         foreach ($this->collectionDefinitions as $collection => $collectionDefinition) {
@@ -29,6 +32,16 @@ class DoctrineToTypesenseTransformer extends AbstractTransformer
     {
         $entityClass = ClassUtils::getClass($entity);
 
+        // See : https://github.com/acseo/TypesenseBundle/pull/91
+        // Allow subclasses to be recognized as a parent class
+        foreach (array_keys($this->entityToCollectionMapping) as $class) {
+            if (is_a($entityClass, $class, true)) {
+                $entityClass = $class;
+                break;
+            }
+        }
+        
+
         if (!isset($this->entityToCollectionMapping[$entityClass])) {
             throw new \Exception(sprintf('Class %s is not supported for Doctrine To Typesense Transformation', $entityClass));
         }
@@ -38,10 +51,16 @@ class DoctrineToTypesenseTransformer extends AbstractTransformer
         $fields = $this->collectionDefinitions[$this->entityToCollectionMapping[$entityClass]]['fields'];
 
         foreach ($fields as $fieldsInfo) {
-            try {
-                $value = $this->accessor->getValue($entity, $fieldsInfo['entity_attribute']);
-            } catch (RuntimeException $exception) {
-                $value = null;
+            $entityAttribute = $fieldsInfo['entity_attribute'];
+
+            if (str_contains($entityAttribute, '::')) {
+                $value = $this->getFieldValueFromService($entity, $entityAttribute);
+            } else {
+                try {
+                    $value = $this->accessor->getValue($entity, $fieldsInfo['entity_attribute']);
+                } catch (RuntimeException $exception) {
+                    $value = null;
+                }
             }
 
             $name = $fieldsInfo['name'];
@@ -70,6 +89,8 @@ class DoctrineToTypesenseTransformer extends AbstractTransformer
         $originalType                = $collectionFieldsDefinitions[$key]['type'];
         $castedType                  = $this->castType($originalType);
 
+        $isOptional = $collectionFieldsDefinitions[$key]['optional'] ?? false;
+
         switch ($originalType.$castedType) {
             case self::TYPE_DATETIME.self::TYPE_INT_64:
                 if ($value instanceof \DateTimeInterface) {
@@ -78,18 +99,41 @@ class DoctrineToTypesenseTransformer extends AbstractTransformer
 
                 return null;
             case self::TYPE_OBJECT.self::TYPE_STRING:
+                if ($isOptional == true && $value == null) {
+                    return null;
+                }
                 return $value->__toString();
             case self::TYPE_COLLECTION.self::TYPE_ARRAY_STRING:
                 return array_values(
-                    $value->map(function ($v) {
+                    $value->map(function ($v) use($isOptional) {
+                        if ($isOptional == true && $v == null) {
+                            return null;
+                        }
                         return $v->__toString();
                     })->toArray()
                 );
             case self::TYPE_STRING.self::TYPE_STRING:
             case self::TYPE_PRIMARY.self::TYPE_STRING:
                 return (string) $value;
+            case self::TYPE_BOOL.self::TYPE_BOOL:
+                return (bool) $value;
             default:
                 return $value;
         }
     }
+
+    private function getFieldValueFromService($entity, $entityAttribute)
+    {
+        $values = explode('::', $entityAttribute);
+
+        if (count($values) === 2) {
+            if ($this->container->has($values[0])) {
+                $service = $this->container->get($values[0]);
+                return call_user_func(array($service, $values[1]), $entity);
+            }
+        }
+
+        return null;
+    }
+
 }
