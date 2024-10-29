@@ -33,15 +33,6 @@ class DocumentManager
         return $this->client->collections[$collection]->documents->upsert($data);
     }
 
-    public function upsert($collection, $data)
-    {
-        if (!$this->client->isOperationnal()) {
-            return null;
-        }
-
-        return $this->client->collections[$collection]->documents->upsert($data);
-    }
-
     public function import(string $collection, array $data, string $action = 'create')
     {
         if (!$this->client->isOperationnal() || empty($data)) {

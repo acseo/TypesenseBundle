@@ -119,9 +119,8 @@ class TypesenseIndexer
         foreach ($this->documentsToIndex as $documentToIndex) {
             $this->documentManager->index(...$documentToIndex);
         }
-
         foreach ($this->documentsToUpdate as $documentToUpdate) {
-            $this->documentManager->upsert($documentToUpdate[0], $documentToUpdate[2]);
+            $this->documentManager->index($documentToUpdate[0], $documentToUpdate[2]);
         }
     }
 
