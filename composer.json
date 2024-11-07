@@ -38,7 +38,7 @@
     "scripts": {
         "typesenseServer": [
           "Composer\\Config::disableProcessTimeout",
-          "docker run -i -p 8108:8108 -v/tmp/typesense-server-data-1c/:/data typesense/typesense:0.23.0 --data-dir /data --api-key=123 --listen-port 8108 --enable-cors"
+          "docker run -i -p 8108:8108 -v/tmp/typesense-server-data-1c/:/data typesense/typesense:27.1 --data-dir /data --api-key=123 --listen-port 8108 --enable-cors"
         ]
     },
     "config": {
