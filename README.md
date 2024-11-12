@@ -69,6 +69,9 @@ acseo_typesense:
                 title: 
                     name: title
                     type: string
+                description: 
+                    name: title
+                    type: description                    
                 author:
                      name: author
                      type: object                    # Object conversion with __toString()
@@ -89,7 +92,15 @@ acseo_typesense:
                     type: string
                     optional: true
                     entity_attribute: ACSEO\Service\BookConverter::getCoverImageURL # use a service converter instead of an attribute
-
+                embeddings:                          # Since Typesense 0.25, you can generate Embeddings on the fly
+                    name: embeddings                 # and retrieve your documents using an vectorial search
+                    type: float[]                    # more info : https://typesense.org/docs/27.0/api/vector-search.html
+                    embed:
+                        from:
+                            - title
+                            - description
+                        model_config: 
+                            model_name: ts/e5-small
             default_sorting_field: sortable_id       # Default sorting field. Must be int32 or float
             symbols_to_index: ['+']                  # Optional - You can add + to this list to make the word c++ indexable verbatim.
         users:
