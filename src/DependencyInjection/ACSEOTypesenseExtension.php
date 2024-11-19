@@ -33,7 +33,9 @@ class ACSEOTypesenseExtension extends Extension
      * @var array
      */
     private $parameters = [];
-
+    /**
+     * @return void
+     */
     public function load(array $configs, ContainerBuilder $container)
     {
         $configuration = new Configuration();
@@ -68,6 +70,7 @@ class ACSEOTypesenseExtension extends Extension
      * Loads the configured clients.
      *
      * @param ContainerBuilder $container A ContainerBuilder instance
+     * @return void
      */
     private function loadClient($config, ContainerBuilder $container)
     {
@@ -86,7 +89,7 @@ class ACSEOTypesenseExtension extends Extension
      *
      * @param array            $collections An array of collection configurations
      * @param ContainerBuilder $container   A ContainerBuilder instance
-     *
+     * @return void
      * @throws \InvalidArgumentException
      */
     private function loadCollections(array $collections, ContainerBuilder $container)
