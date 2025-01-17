@@ -40,8 +40,8 @@ class ACSEOTypesenseExtension extends Extension
 
         $config = $this->processConfiguration($configuration, $configs);
 
-        if (empty($config['typesense']) || empty($config['collections'])) {
-            // No Host or collection are defined
+        if (empty($config['typesense'])) {
+            // No Host is not defined
             return;
         }
 
@@ -52,6 +52,12 @@ class ACSEOTypesenseExtension extends Extension
         $loader->load('services.xml');
 
         $this->loadClient($config['typesense'], $container);
+
+        if (empty($config['collections'])) {
+            // Collections are defined
+            return;
+        }
+
 
         $this->loadCollections($config['collections'], $container);
 
