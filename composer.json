@@ -22,9 +22,9 @@
     },
     "require-dev": {
         "symfony/phpunit-bridge": "^5.0|^6.0",
-        "phpunit/phpunit": "^9.5",
-        "symfony/yaml": "^3.4 || ^4.4 || ^5.4 || ^6.0",
-        "dg/bypass-finals": "^1.4",
+        "phpunit/phpunit": "^9.6",
+        "symfony/yaml": "^4.4 || ^5.4 || ^6.0",
+        "dg/bypass-finals": "^1.9",
         "phpspec/prophecy-phpunit": "^2.0"
     },
     "autoload": {
