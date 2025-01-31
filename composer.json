@@ -1,12 +1,12 @@
 {
-    "name": "acseo/typesense-bundle",
+    "name": "einpix/typesense-bundle",
     "description": "This bundle provides integration with Typesense in Symfony",
     "type": "symfony-bundle",
     "license": "MIT",
     "authors": [
         {
-            "name": "Nicolas Potier",
-            "email": "nicolas.potier@acseo.fr"
+            "name": "EINPIX",
+            "email": "developer@einpix.com"
         }
     ],
     "require": {
