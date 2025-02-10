@@ -112,7 +112,6 @@ class TypesenseIndexer
     public function postFlush()
     {
         $this->indexDocuments();
-        $this->updateDocuments();
         $this->deleteDocuments();
 
         $this->resetDocuments();
@@ -123,12 +122,7 @@ class TypesenseIndexer
         foreach ($this->documentsToIndex as $documentToIndex) {
             $this->documentManager->index(...$documentToIndex);
         }
-    }
-
-    private function updateDocuments()
-    {
         foreach ($this->documentsToUpdate as $documentToUpdate) {
-            $this->documentManager->delete($documentToUpdate[0], $documentToUpdate[1]);
             $this->documentManager->index($documentToUpdate[0], $documentToUpdate[2]);
         }
     }

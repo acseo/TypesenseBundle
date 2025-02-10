@@ -130,6 +130,7 @@ class ACSEOTypesenseExtension extends Extension
                 $config['fields']['id'] = [
                     'name' => 'entity_id',
                     'type' => 'primary',
+                    'entity_attribute' => 'id'
                 ];
             }
 
@@ -154,6 +155,7 @@ class ACSEOTypesenseExtension extends Extension
                 'default_sorting_field' => $config['default_sorting_field'],
                 'token_separators'      => $config['token_separators'],
                 'symbols_to_index'      => $config['symbols_to_index'],
+                'enable_nested_fields'  => $config['enable_nested_fields'] ?? false,
             ];
         }
     }
