@@ -42,8 +42,9 @@ class TypesenseIndexer
             return;
         }
 
-        $collection = $this->getCollectionName($entity);
-        $data       = $this->transformer->convert($entity);
+        $collection  = $this->getCollectionName($entity);
+        $entityClass = ClassUtils::getClass($entity);
+        $data        = $this->transformer->convert($entity, $entityClass);
 
         $this->documentsToIndex[] = [$collection, $data];
     }
@@ -61,8 +62,10 @@ class TypesenseIndexer
 
         $this->checkPrimaryKeyExists($collectionConfig);
 
-        $collection = $this->getCollectionName($entity);
-        $data       = $this->transformer->convert($entity);
+        $collection  = $this->getCollectionName($entity);
+        $entityClass = ClassUtils::getClass($entity);
+
+        $data        = $this->transformer->convert($entity, $entityClass);
 
         $this->documentsToUpdate[] = [$collection, $data['id'], $data];
     }
@@ -85,8 +88,8 @@ class TypesenseIndexer
         if ($this->entityIsNotManaged($entity)) {
             return;
         }
-
-        $data = $this->transformer->convert($entity);
+        $entityClass = ClassUtils::getClass($entity);
+        $data = $this->transformer->convert($entity, $entityClass);
 
         $this->objetsIdThatCanBeDeletedByObjectHash[spl_object_hash($entity)] = $data['id'];
     }
