@@ -38,6 +38,7 @@ class Configuration implements ConfigurationInterface
                                         ->scalarNode('entity_attribute')->end()
                                         ->scalarNode('name')->end()
                                         ->scalarNode('type')->end()
+                                        ->scalarNode('locale')->end()
                                         ->booleanNode('facet')->end()
                                         ->booleanNode('infix')->end()
                                         ->booleanNode('optional')->end()
