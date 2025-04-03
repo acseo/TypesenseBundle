@@ -24,6 +24,7 @@ acseo_typesense:
                 title: 
                     name: title
                     type: string
+                    locale: 'en'
                 author:
                      name: author
                      type: object                    # Object conversion with __toString()
