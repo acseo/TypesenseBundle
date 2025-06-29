@@ -30,7 +30,7 @@ class DocumentManager
             return null;
         }
 
-        return $this->client->collections[$collection]->documents->create($data);
+        return $this->client->collections[$collection]->documents->upsert($data);
     }
 
     public function import(string $collection, array $data, string $action = 'create')

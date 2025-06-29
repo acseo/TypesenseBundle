@@ -16,12 +16,13 @@ use ACSEO\TypesenseBundle\Tests\Functional\Entity\Author;
 use ACSEO\TypesenseBundle\Tests\Functional\Entity\Book;
 use ACSEO\TypesenseBundle\Transformer\DoctrineToTypesenseTransformer;
 use Doctrine\DBAL\Connection;
-use Doctrine\ORM\AbstractQuery;
+use Doctrine\ORM\Query;
 use Doctrine\ORM\Configuration;
 use Doctrine\ORM\EntityManager;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Tester\CommandTester;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 
 /**
@@ -60,7 +61,7 @@ class AllowNullConnexionTest extends KernelTestCase
 
         // the output of the command in the console
         $output = $commandTester->getDisplay();
-        self::assertStringContainsString('Import [books]', $output);
+        self::assertStringContainsString('[books] ACSEO\TypesenseBundle\Tests\Functional\Entity\Book', $output);
         self::assertStringContainsString('[OK] '.self::NB_BOOKS.' elements populated', $output);
     }
 
@@ -95,7 +96,8 @@ class AllowNullConnexionTest extends KernelTestCase
         $typeSenseClient       = new TypesenseClient('null', 'null');
         $propertyAccessor      = PropertyAccess::createPropertyAccessor();
         $collectionClient      = new CollectionClient($typeSenseClient);
-        $transformer           = new DoctrineToTypesenseTransformer($collectionDefinitions, $propertyAccessor);
+        $container             = $this->createMock(ContainerInterface::class);
+        $transformer           = new DoctrineToTypesenseTransformer($collectionDefinitions, $propertyAccessor, $container);
         $collectionManager     = new CollectionManager($collectionClient, $transformer, $collectionDefinitions);
 
         $command = new CreateCommand($collectionManager);
@@ -117,7 +119,8 @@ class AllowNullConnexionTest extends KernelTestCase
         $typeSenseClient       = new TypesenseClient('null', 'null');
         $propertyAccessor      = PropertyAccess::createPropertyAccessor();
         $collectionClient      = new CollectionClient($typeSenseClient);
-        $transformer           = new DoctrineToTypesenseTransformer($collectionDefinitions, $propertyAccessor);
+        $container             = $this->createMock(ContainerInterface::class);
+        $transformer           = new DoctrineToTypesenseTransformer($collectionDefinitions, $propertyAccessor, $container);
         $documentManager       = new DocumentManager($typeSenseClient);
         $collectionManager     = new CollectionManager($collectionClient, $transformer, $collectionDefinitions);
         $em                    = $this->getMockedEntityManager($books);
@@ -196,8 +199,11 @@ class AllowNullConnexionTest extends KernelTestCase
         $configuration = $this->createMock(Configuration::class);
         $connection->method('getConfiguration')->willReturn($configuration);
 
-        $query = $this->createMock(AbstractQuery::class);
+        $query = $this->createMock(Query::class);
         $em->method('createQuery')->willReturn($query);
+
+        $query->method('setFirstResult')->willReturn($query);
+        $query->method('setMaxResults')->willReturn($query);
 
         $query->method('getSingleScalarResult')->willReturn(self::NB_BOOKS);
 

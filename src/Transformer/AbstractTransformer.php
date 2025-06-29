@@ -14,6 +14,7 @@ abstract class AbstractTransformer
     public const TYPE_STRING       = 'string';
     public const TYPE_INT_32       = 'int32';
     public const TYPE_INT_64       = 'int64';
+    public const TYPE_BOOL         = 'bool';
 
     /**
      * Convert an object to a array of data indexable by typesense.
@@ -49,6 +50,9 @@ abstract class AbstractTransformer
         }
         if ($type === self::TYPE_OBJECT) {
             return self::TYPE_STRING;
+        }
+        if ($type === self::TYPE_BOOL) {
+            return self::TYPE_BOOL;
         }
 
         return $type;

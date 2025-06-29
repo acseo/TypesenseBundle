@@ -26,14 +26,25 @@ class CollectionFinder implements CollectionFinderInterface
         return $this->search($query);
     }
 
-    public function query(TypesenseQuery $query)
+    public function query(TypesenseQuery $query): TypesenseResponse
     {
         $results = $this->search($query);
 
         return $this->hydrate($results);
     }
 
-    private function hydrate($results)
+    public function hydrateResponse(TypesenseResponse $response) : TypesenseResponse
+    {
+        return $this->hydrate($response);
+    }
+
+    /**
+     * Add database entities to Typesense Response
+     *
+     * @param TypesenseResponse $results
+     * @return TypesenseResponse
+     */
+    private function hydrate(TypesenseResponse $results) : TypesenseResponse
     {
         $ids             = [];
         $primaryKeyInfos = $this->getPrimaryKeyInfo();
@@ -43,11 +54,30 @@ class CollectionFinder implements CollectionFinderInterface
 
         $hydratedResults = [];
         if (count($ids)) {
-            $rsm = new ResultSetMappingBuilder($this->em);
-            $rsm->addRootEntityFromClassMetadata($this->collectionConfig['entity'], 'e');
-            $tableName       = $this->em->getClassMetadata($this->collectionConfig['entity'])->getTableName();
-            $query           = $this->em->createNativeQuery('SELECT * FROM '.$tableName.' WHERE '.$primaryKeyInfos['entityAttribute'].' IN ('.implode(', ', $ids).') ORDER BY FIELD(id,'.implode(', ', $ids).')', $rsm);
-            $hydratedResults = $query->getResult();
+            $dql = sprintf(
+                'SELECT e FROM %s e WHERE e.%s IN (:ids)',
+                $this->collectionConfig['entity'],
+                $primaryKeyInfos['entityAttribute']
+            );
+
+            $query = $this->em->createQuery($dql);
+            $query->setParameter('ids', $ids);
+
+            $unorderedResults = $query->getResult();
+
+            // sort index
+            $idIndex = array_flip($ids);
+
+            usort($unorderedResults, function ($a, $b) use ($idIndex, $primaryKeyInfos) {
+                $entityIdMethod = 'get' . ucfirst($primaryKeyInfos['entityAttribute']);
+                $idA = $a->$entityIdMethod();
+                $idB = $b->$entityIdMethod();
+
+                return $idIndex[$idA] <=> $idIndex[$idB];
+            });
+
+            $hydratedResults = $unorderedResults;
+
         }
         $results->setHydratedHits($hydratedResults);
         $results->setHydrated(true);
@@ -55,7 +85,7 @@ class CollectionFinder implements CollectionFinderInterface
         return $results;
     }
 
-    private function search(TypesenseQuery $query)
+    private function search(TypesenseQuery $query) : TypesenseResponse
     {
         $result = $this->collectionClient->search($this->collectionConfig['typesense_name'], $query);
 

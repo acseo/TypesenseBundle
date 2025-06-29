@@ -9,4 +9,6 @@ interface CollectionFinderInterface
     public function rawQuery(TypesenseQuery $query);
 
     public function query(TypesenseQuery $query);
+
+    public function hydrateResponse(TypesenseResponse $response);
 }

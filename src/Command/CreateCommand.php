@@ -8,7 +8,9 @@ use ACSEO\TypesenseBundle\Manager\CollectionManager;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Style\SymfonyStyle;
 
 #[AsCommand(
     name: 'typesense:create',
@@ -26,6 +28,8 @@ class CreateCommand extends Command
     protected function configure()
     {
         $this
+            ->setName(self::$defaultName)
+            ->addOption('indexes', null, InputOption::VALUE_OPTIONAL, 'The index(es) to repopulate. Comma separated values')
             ->setDescription('Create Typsenses indexes')
 
         ;
@@ -33,9 +37,25 @@ class CreateCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $defs = $this->collectionManager->getCollectionDefinitions();
+        $io = new SymfonyStyle($input, $output);
 
-        foreach ($defs as $name => $def) {
+        $collectionDefinitions = $this->collectionManager->getCollectionDefinitions();
+        $indexes = (null !== $indexes = $input->getOption('indexes')) ? explode(',', $indexes) : \array_keys($collectionDefinitions);
+
+        foreach ($indexes as $index) {
+            if (!isset($collectionDefinitions[$index])) {
+                $io->error('Unable to find index "'.$index.'" in collection definition (available : '.implode(', ', array_keys($collectionDefinitions)).')');
+
+                return 2;
+            }
+        }
+
+        // filter collection definitions
+        $collectionDefinitions = array_filter($collectionDefinitions, function ($key) use ($indexes) {
+            return \in_array($key, $indexes, true);
+        }, ARRAY_FILTER_USE_KEY);
+
+        foreach ($collectionDefinitions as $name => $def) {
             $name = $def['name'];
             $typesenseName = $def['typesense_name'];
             try {

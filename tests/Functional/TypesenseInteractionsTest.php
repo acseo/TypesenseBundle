@@ -17,13 +17,14 @@ use ACSEO\TypesenseBundle\Tests\Functional\Entity\Author;
 use ACSEO\TypesenseBundle\Tests\Functional\Entity\Book;
 use ACSEO\TypesenseBundle\Transformer\DoctrineToTypesenseTransformer;
 use Doctrine\DBAL\Connection;
-use Doctrine\ORM\AbstractQuery;
+use Doctrine\ORM\Query;
 use Doctrine\ORM\Configuration;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Event\LifecycleEventArgs;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Tester\CommandTester;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 
 /**
@@ -41,6 +42,8 @@ class TypesenseInteractionsTest extends KernelTestCase
         'La chute du monstre',
     ];
 
+    private $cptToIterableCall;
+    
     public function testCreateCommand()
     {
         $commandTester = $this->createCommandTester();
@@ -54,22 +57,67 @@ class TypesenseInteractionsTest extends KernelTestCase
 
     /**
      * @depends testCreateCommand
+     * @dataProvider importCommandProvider
      */
-    public function testImportCommand()
+    public function testImportCommand($nbBooks, $maxPerPage = null, $firstPage = null, $lastPage = null, $expectedCount = null)
     {
-        $commandTester = $this->importCommandTester();
-        $commandTester->execute([]);
+        $commandTester = $this->importCommandTester([
+            'nbBooks' => $nbBooks,
+            'maxPerPage' => $maxPerPage,
+            'firstPage' => $firstPage,
+            'lastPage' => $lastPage
+        ]);
+        
+        $commandOptions = ['-vvv'];
+
+        if ($maxPerPage != null) {
+            $commandOptions['--max-per-page'] = $maxPerPage;
+        }
+        if ($firstPage != null) {
+            $commandOptions['--first-page'] = $firstPage;
+        } 
+        if ($lastPage != null) {
+            $commandOptions['--last-page'] = $lastPage;
+        } 
+
+        $commandTester->execute($commandOptions);
 
         // the output of the command in the console
         $output = $commandTester->getDisplay();
-        self::assertStringContainsString('Import [books]', $output);
-        self::assertStringContainsString('[OK] '.self::NB_BOOKS.' elements populated', $output);
+        
+        self::assertStringContainsString(
+            sprintf('[books] ACSEO\TypesenseBundle\Tests\Functional\Entity\Book %s entries to insert', $nbBooks), 
+            $output
+        );
+        self::assertStringContainsString(
+            sprintf('[OK] %s elements populated', $expectedCount ?? $nbBooks), 
+            $output
+        );
+    }
+
+    public function importCommandProvider()
+    {
+        return [
+            "insert 10 books one by one" => [
+                10, 1
+            ],
+            "insert 42 books 10 by 10" => [
+                42, 10
+            ],
+            "insert 130 books 100 per 100" => [
+                130, null //100 is by defaut
+            ],
+            "insert 498 books 50 per 50, from page 8 to 10 and expect 148 inserted" => [
+                498, 50, 8, 10, 148
+            ]
+        ];
     }
 
     /**
      * @depends testImportCommand
+     * @dataProvider importCommandProvider
      */
-    public function testSearchByAuthor()
+    public function testSearchByAuthor($nbBooks)
     {
         $typeSenseClient       = new TypesenseClient($_ENV['TYPESENSE_URL'], $_ENV['TYPESENSE_KEY']);
         $collectionClient      = new CollectionClient($typeSenseClient);
@@ -79,8 +127,14 @@ class TypesenseInteractionsTest extends KernelTestCase
         $bookDefinition        = $collectionDefinitions['books'];
 
         $bookFinder = new CollectionFinder($collectionClient, $em, $bookDefinition);
-        $results    = $bookFinder->rawQuery(new TypesenseQuery('Nicolas', 'author'))->getResults();
-        self::assertCount(self::NB_BOOKS, $results, "result doesn't contains ".self::NB_BOOKS.' elements');
+        $query = new TypesenseQuery('Nicolas', 'author');
+
+        $query->maxHits($nbBooks < 250 ? $nbBooks : 250);
+        $query->perPage($nbBooks < 250 ? $nbBooks : 250);
+        
+        $results    = $bookFinder->rawQuery($query)->getResults();
+
+        self::assertCount(($nbBooks < 250 ? $nbBooks : 250), $results, "result doesn't contains ".$nbBooks.' elements');
         self::assertArrayHasKey('document', $results[0], "First item does not have the key 'document'");
         self::assertArrayHasKey('highlights', $results[0], "First item does not have the key 'highlights'");
         self::assertArrayHasKey('text_match', $results[0], "First item does not have the key 'text_match'");
@@ -88,8 +142,9 @@ class TypesenseInteractionsTest extends KernelTestCase
 
     /**
      * @depends testImportCommand
+     * @dataProvider importCommandProvider
      */
-    public function testSearchByTitle()
+    public function testSearchByTitle($nbBooks)
     {
         $typeSenseClient  = new TypesenseClient($_ENV['TYPESENSE_URL'], $_ENV['TYPESENSE_KEY']);
         $collectionClient = new CollectionClient($typeSenseClient);
@@ -120,7 +175,8 @@ class TypesenseInteractionsTest extends KernelTestCase
         $collectionClient      = new CollectionClient($typeSenseClient);
         $collectionDefinitions = $this->getCollectionDefinitions(Book::class);
         $propertyAccessor      = PropertyAccess::createPropertyAccessor();
-        $transformer           = new DoctrineToTypesenseTransformer($collectionDefinitions, $propertyAccessor);
+        $container             = $this->createMock(ContainerInterface::class);
+        $transformer           = new DoctrineToTypesenseTransformer($collectionDefinitions, $propertyAccessor, $container);
         $collectionManager     = new CollectionManager($collectionClient, $transformer, $collectionDefinitions);
         $typeSenseClient       = new TypesenseClient($_ENV['TYPESENSE_URL'], $_ENV['TYPESENSE_KEY']);
         $documentManager       = new DocumentManager($typeSenseClient);
@@ -192,7 +248,8 @@ class TypesenseInteractionsTest extends KernelTestCase
         $typeSenseClient       = new TypesenseClient($_ENV['TYPESENSE_URL'], $_ENV['TYPESENSE_KEY']);
         $propertyAccessor      = PropertyAccess::createPropertyAccessor();
         $collectionClient      = new CollectionClient($typeSenseClient);
-        $transformer           = new DoctrineToTypesenseTransformer($collectionDefinitions, $propertyAccessor);
+        $container             = $this->createMock(ContainerInterface::class);
+        $transformer           = new DoctrineToTypesenseTransformer($collectionDefinitions, $propertyAccessor, $container);
         $collectionManager     = new CollectionManager($collectionClient, $transformer, $collectionDefinitions);
 
         $command = new CreateCommand($collectionManager);
@@ -202,22 +259,23 @@ class TypesenseInteractionsTest extends KernelTestCase
         return new CommandTester($application->find('typesense:create'));
     }
 
-    private function importCommandTester(): CommandTester
+    private function importCommandTester($options): CommandTester
     {
         $application = new Application();
 
         $application->setAutoExit(false);
 
         // Prepare all mocked objects required to run the command
-        $books                 = $this->getMockedBooks();
+        $books                 = $this->getMockedBooks($options);
         $collectionDefinitions = $this->getCollectionDefinitions(Book::class);
         $typeSenseClient       = new TypesenseClient($_ENV['TYPESENSE_URL'], $_ENV['TYPESENSE_KEY']);
         $propertyAccessor      = PropertyAccess::createPropertyAccessor();
         $collectionClient      = new CollectionClient($typeSenseClient);
-        $transformer           = new DoctrineToTypesenseTransformer($collectionDefinitions, $propertyAccessor);
+        $container             = $this->createMock(ContainerInterface::class);
+        $transformer           = new DoctrineToTypesenseTransformer($collectionDefinitions, $propertyAccessor, $container);
         $documentManager       = new DocumentManager($typeSenseClient);
         $collectionManager     = new CollectionManager($collectionClient, $transformer, $collectionDefinitions);
-        $em                    = $this->getMockedEntityManager($books);
+        $em                    = $this->getMockedEntityManager($books, $options);
 
         $command = new ImportCommand($em, $collectionManager, $documentManager, $transformer);
 
@@ -233,6 +291,7 @@ class TypesenseInteractionsTest extends KernelTestCase
                 'typesense_name' => 'books',
                 'entity'         => $entityClass,
                 'name'           => 'books',
+                'default_sorting_field' => 'sortable_id',
                 'fields'         => [
                     'id' => [
                         'name'             => 'id',
@@ -254,7 +313,7 @@ class TypesenseInteractionsTest extends KernelTestCase
                         'type'             => 'object',
                         'entity_attribute' => 'author',
                     ],
-                    'michel' => [
+                    'country' => [
                         'name'             => 'author_country',
                         'type'             => 'string',
                         'entity_attribute' => 'author.country',
@@ -265,25 +324,39 @@ class TypesenseInteractionsTest extends KernelTestCase
                         'optional'         => true,
                         'entity_attribute' => 'publishedAt',
                     ],
+                    'embeddings' => [
+                        'name'             => 'embeddings',
+                        'type'             => 'float[]',
+                        'optional'         => false,
+                        "embed" => [
+                            "from" => [
+                                "author",
+                                "title"
+                            ],
+                            "model_config" => [
+                                "model_name" => "ts/e5-small"
+                            ]
+                        ],
+                    ],
                 ],
-                'default_sorting_field' => 'sortable_id',
             ],
         ];
     }
 
-    private function getMockedBooks()
+    private function getMockedBooks($options)
     {
         $author = new Author('Nicolas Potier', 'France');
         $books  = [];
 
-        for ($i = 0; $i < self::NB_BOOKS; ++$i) {
-            $books[] = new Book($i, self::BOOK_TITLES[$i], $author, new \DateTime());
+        $nbBooks = $options['nbBooks'] ?? self::NB_BOOKS;
+        for ($i = 0; $i < $nbBooks; ++$i) {
+            $books[] = new Book($i, self::BOOK_TITLES[$i] ?? 'Book '.$i, $author, new \DateTime());
         }
 
         return $books;
     }
 
-    private function getMockedEntityManager($books)
+    private function getMockedEntityManager($books, array $options = [])
     {
         $em = $this->createMock(EntityManager::class);
 
@@ -293,12 +366,29 @@ class TypesenseInteractionsTest extends KernelTestCase
         $configuration = $this->createMock(Configuration::class);
         $connection->method('getConfiguration')->willReturn($configuration);
 
-        $query = $this->createMock(AbstractQuery::class);
+        $query = $this->createMock(Query::class);
         $em->method('createQuery')->willReturn($query);
 
-        $query->method('getSingleScalarResult')->willReturn(self::NB_BOOKS);
+        $query->method('getSingleScalarResult')->willReturn(count($books));
 
-        $query->method('toIterable')->willReturn($books);
+        $query->method('setFirstResult')->willReturn($query);
+        $query->method('setMaxResults')->willReturn($query);
+
+        // Dirty Method to count number of call to the method toIterable in order to return
+        // the good results
+        $this->cptToIterableCall = isset($options['firstPage']) ? ($options['firstPage']-1) : 0;
+        
+        $maxPerPage = $options['maxPerPage'] ?? 100;
+
+        $query->method('toIterable')->will($this->returnCallback(function() use ($books, $maxPerPage){
+            $result =  array_slice($books, 
+                $this->cptToIterableCall * $maxPerPage,
+                $maxPerPage
+            );
+            $this->cptToIterableCall++;
+
+            return $result;
+        }));
 
         return $em;
     }

@@ -24,7 +24,7 @@ class CollectionClient
         return $this->client->collections[$collectionName]->documents->search($query->getParameters());
     }
 
-    public function multiSearch(array $searchRequests, ?TypesenseQuery $commonSearchParams)
+    public function multiSearch(array $searchRequests, ?TypesenseQuery $commonSearchParams = null)
     {
         if (!$this->client->isOperationnal()) {
             return null;
@@ -58,19 +58,26 @@ class CollectionClient
         return $this->client->collections->retrieve();
     }
 
-    public function create($name, $fields, $defaultSortingField, array $tokenSeparators, array $symbolsToIndex)
+    public function create($name, $fields, $defaultSortingField, array $tokenSeparators, array $symbolsToIndex, bool $enableNestedFields = false, array $embed = null)
     {
         if (!$this->client->isOperationnal()) {
             return null;
         }
 
-        $this->client->collections->create([
+        $options = [
             'name'                  => $name,
             'fields'                => $fields,
             'default_sorting_field' => $defaultSortingField,
             'token_separators'      => $tokenSeparators,
             'symbols_to_index'      => $symbolsToIndex,
-        ]);
+            'enable_nested_fields'  => $enableNestedFields,
+        ];
+        
+        if ($embed) {
+            $options['embed'] = $embed;
+        }
+
+        $this->client->collections->create($options);
     }
 
     public function delete(string $name)

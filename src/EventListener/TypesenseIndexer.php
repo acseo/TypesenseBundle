@@ -15,6 +15,7 @@ class TypesenseIndexer
     private $collectionManager;
     private $transformer;
     private $managedClassNames;
+    private DocumentManager $documentManager;
 
     private $objetsIdThatCanBeDeletedByObjectHash = [];
     private $documentsToIndex                     = [];
@@ -31,7 +32,6 @@ class TypesenseIndexer
         $this->transformer       = $transformer;
 
         $this->managedClassNames  = $this->collectionManager->getManagedClassNames();
-        $this->objectsIDsToDelete = [];
     }
 
     public function postPersist(LifecycleEventArgs $args)
@@ -56,7 +56,7 @@ class TypesenseIndexer
             return;
         }
 
-        $collectionDefinitionKey = $this->getCollectionName($entity);
+        $collectionDefinitionKey = $this->getCollectionKey($entity);
         $collectionConfig        = $this->collectionManager->getCollectionDefinitions()[$collectionDefinitionKey];
 
         $this->checkPrimaryKeyExists($collectionConfig);
@@ -109,7 +109,6 @@ class TypesenseIndexer
     public function postFlush()
     {
         $this->indexDocuments();
-        $this->updateDocuments();
         $this->deleteDocuments();
 
         $this->resetDocuments();
@@ -120,12 +119,7 @@ class TypesenseIndexer
         foreach ($this->documentsToIndex as $documentToIndex) {
             $this->documentManager->index(...$documentToIndex);
         }
-    }
-
-    private function updateDocuments()
-    {
         foreach ($this->documentsToUpdate as $documentToUpdate) {
-            $this->documentManager->delete($documentToUpdate[0], $documentToUpdate[1]);
             $this->documentManager->index($documentToUpdate[0], $documentToUpdate[2]);
         }
     }
@@ -156,5 +150,16 @@ class TypesenseIndexer
         $entityClassname = ClassUtils::getClass($entity);
 
         return array_search($entityClassname, $this->managedClassNames, true);
+    }
+
+    private function getCollectionKey($entity)
+    {
+        $entityClassname = ClassUtils::getClass($entity);
+
+        foreach ($this->collectionManager->getCollectionDefinitions() as $key => $def) {
+            if ($def['entity'] === $entityClassname) {
+                return $key;
+            }
+        }
     }
 }
