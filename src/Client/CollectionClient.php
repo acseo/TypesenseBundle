@@ -58,7 +58,7 @@ class CollectionClient
         return $this->client->collections->retrieve();
     }
 
-    public function create($name, $fields, $defaultSortingField, array $tokenSeparators, array $symbolsToIndex, bool $enableNestedFields = false, array $embed = null)
+    public function create($name, $fields, $defaultSortingField, array $tokenSeparators, array $symbolsToIndex, bool $enableNestedFields = false, ?array $embed = null)
     {
         if (!$this->client->isOperationnal()) {
             return null;
