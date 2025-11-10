@@ -4,7 +4,7 @@
            xsi:schemaLocation="http://symfony.com/schema/dic/services
         https://symfony.com/schema/dic/services/services-1.0.xsd">
     <services>
-        <defaults public="true"/>
+        <defaults public="true" />
 
         <!-- Abstract definition for client. -->
         <service id="typesense.client_prototype" class="ACSEO\TypesenseBundle\Client\TypesenseClient" public="true"
@@ -69,6 +69,26 @@
             <argument type="service" id="service_container" />
         </service>
 
+        <service id="typesense.transformer.array_to_typesense"
+                 class="ACSEO\TypesenseBundle\Transformer\ArrayToTypesenseTransformer">
+            <argument/> <!-- collections -->
+            <tag name="typesense.context_aware_transformer"/>
+        </service>
+
+        <service id="typesense.data_provide.doctrine"
+                 class="ACSEO\TypesenseBundle\DataProvider\EntityDataProvider" autowire="true" >
+        </service>
+
+        <service id="typesense.transformer.container"
+                 class="ACSEO\TypesenseBundle\Transformer\TransformerContainer">
+            <argument type="tagged_iterator" tag="typesense.context_aware_transformer"/>
+        </service>
+
+        <service id="typesense.data_provider.container"
+                 class="ACSEO\TypesenseBundle\DataProvider\DataProviderContainer">
+            <argument type="tagged_iterator" tag="typesense.context_aware_data_provider"/>
+        </service>
+
         <!-- commands -->
         <service id="typesense.command.create" class="ACSEO\TypesenseBundle\Command\CreateCommand" public="true">
             <tag name="console.command"/>
@@ -80,7 +100,8 @@
             <argument type="service" id="doctrine.orm.entity_manager"/>
             <argument type="service" id="typesense.collection_manager"/>
             <argument type="service" id="typesense.document_manager"/>
-            <argument type="service" id="typesense.transformer.doctrine_to_typesense"/>
+            <argument type="service" id="typesense.transformer.container"/>
+            <argument type="service" id="typesense.data_provider.container"/>
         </service>
     </services>
 </container>

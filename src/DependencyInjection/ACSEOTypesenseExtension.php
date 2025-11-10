@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace ACSEO\TypesenseBundle\DependencyInjection;
 
+use ACSEO\TypesenseBundle\DataProvider\ContextAwareDataProvider;
+use ACSEO\TypesenseBundle\Transformer\ContextAwareTransformer;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ChildDefinition;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -61,7 +63,19 @@ class ACSEOTypesenseExtension extends Extension
         $this->loadFinderServices($container);
 
         $this->loadTransformer($container);
+
+        $this->loadTaggedServices($container);
+
         $this->configureController($container);
+    }
+
+    // Add tag to services
+    private function loadTaggedServices(ContainerBuilder $container)
+    {
+        $container->registerForAutoconfiguration(ContextAwareDataProvider::class)
+            ->addTag('typesense.context_aware_data_provider');
+        $container->registerForAutoconfiguration(ContextAwareTransformer::class)
+            ->addTag('typesense.context_aware_transformer');
     }
 
     /**
@@ -161,6 +175,8 @@ class ACSEOTypesenseExtension extends Extension
     private function loadTransformer(ContainerBuilder $container): void
     {
         $managerDef = $container->getDefinition('typesense.transformer.doctrine_to_typesense');
+        $managerDef->replaceArgument(0, $this->collectionsConfig);
+        $managerDef = $container->getDefinition('typesense.transformer.array_to_typesense');
         $managerDef->replaceArgument(0, $this->collectionsConfig);
     }
 

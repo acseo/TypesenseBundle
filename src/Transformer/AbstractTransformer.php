@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace ACSEO\TypesenseBundle\Transformer;
 
-abstract class AbstractTransformer
+abstract class AbstractTransformer implements Transformer
 {
     public const TYPE_COLLECTION   = 'collection';
     public const TYPE_DATETIME     = 'datetime';
@@ -16,23 +16,8 @@ abstract class AbstractTransformer
     public const TYPE_INT_64       = 'int64';
     public const TYPE_BOOL         = 'bool';
 
-    /**
-     * Convert an object to a array of data indexable by typesense.
-     *
-     * @param object $entity the object to convert
-     *
-     * @return array the converted data
-     */
-    abstract public function convert(object $entity): array;
-
-    /**
-     * Convert a value to an acceptable value for typesense.
-     *
-     * @param string $objectClass the object class name
-     * @param string $properyName the property of the object
-     * @param [type] $value the value to convert
-     */
-    abstract public function castValue(string $objectClass, string $properyName, $value);
+    protected array $entityToCollectionMapping;
+    protected array $collectionDefinitions;
 
     /**
      * map a type to a typesense type field.
@@ -56,5 +41,42 @@ abstract class AbstractTransformer
         }
 
         return $type;
+    }
+
+    public function castValue(string $entityClass, string $propertyName, $value)
+    {
+        $collection = $this->entityToCollectionMapping[$entityClass];
+        $key        = array_search(
+            $propertyName,
+            array_column(
+                $this->collectionDefinitions[$collection]['fields'],
+                'name'
+            ), true
+        );
+        $collectionFieldsDefinitions = array_values($this->collectionDefinitions[$collection]['fields']);
+        $originalType                = $collectionFieldsDefinitions[$key]['type'];
+        $castedType                  = $this->castType($originalType);
+
+        switch ($originalType.$castedType) {
+            case self::TYPE_DATETIME.self::TYPE_INT_64:
+                if ($value instanceof \DateTimeInterface) {
+                    return $value->getTimestamp();
+                }
+
+                return null;
+            case self::TYPE_OBJECT.self::TYPE_STRING:
+                return $value->__toString();
+            case self::TYPE_COLLECTION.self::TYPE_ARRAY_STRING:
+                return array_values(
+                    $value->map(function ($v) {
+                        return $v->__toString();
+                    })->toArray()
+                );
+            case self::TYPE_STRING.self::TYPE_STRING:
+            case self::TYPE_PRIMARY.self::TYPE_STRING:
+                return (string) $value;
+            default:
+                return $value;
+        }
     }
 }

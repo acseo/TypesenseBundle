@@ -9,10 +9,8 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\PropertyAccess\Exception\RuntimeException;
 use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
 
-class DoctrineToTypesenseTransformer extends AbstractTransformer
+class DoctrineToTypesenseTransformer extends AbstractTransformer implements ContextAwareTransformer
 {
-    private $collectionDefinitions;
-    private $entityToCollectionMapping;
     private $accessor;
     private $container;
 
@@ -28,14 +26,14 @@ class DoctrineToTypesenseTransformer extends AbstractTransformer
         }
     }
 
-    public function convert($entity): array
+    public function convert($entity, string $className): array
     {
-        $entityClass = ClassUtils::getClass($entity);
+        $entityClass = $className;
 
         // See : https://github.com/acseo/TypesenseBundle/pull/91
         // Allow subclasses to be recognized as a parent class
         foreach (array_keys($this->entityToCollectionMapping) as $class) {
-            if (is_a($entityClass, $class, true)) {
+            if (is_a($className, $class, true)) {
                 $entityClass = $class;
                 break;
             }
@@ -71,7 +69,7 @@ class DoctrineToTypesenseTransformer extends AbstractTransformer
             $name = $fieldsInfo['name'];
 
             $data[$name] = $this->castValue(
-                $entityClass,
+                $className,
                 $name,
                 $value
             );
@@ -141,4 +139,8 @@ class DoctrineToTypesenseTransformer extends AbstractTransformer
         return null;
     }
 
+    public function supports(mixed $element, string $className = null)
+    {
+        return is_object($element) && $className !== null && isset($this->entityToCollectionMapping[$className]);
+    }
 }
