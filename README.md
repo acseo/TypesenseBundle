@@ -257,7 +257,7 @@ acseo_typesense:
                         drop_tokens_threshold: 1     #
 ```
 
-This configuration will create a service named `@typesense.finder.books.books_autocomplete`.  
+This configuration will create a service named `@typesense.specificfinder.books.books_autocomplete`.  
 You can inject the specific finder in your Controller or into other services
 
 ```yaml
@@ -265,7 +265,7 @@ You can inject the specific finder in your Controller or into other services
 services:
     App\Controller\BookController:
         arguments:
-            $autocompleteBookFinder: '@typesense.finder.books.books_autocomplete'
+            $autocompleteBookFinder: '@typesense.specificfinder.books.books_autocomplete'
 ```
 
 and then use it like this :
