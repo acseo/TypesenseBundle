@@ -7,7 +7,7 @@ namespace ACSEO\TypesenseBundle\EventListener;
 use ACSEO\TypesenseBundle\Manager\CollectionManager;
 use ACSEO\TypesenseBundle\Manager\DocumentManager;
 use ACSEO\TypesenseBundle\Transformer\DoctrineToTypesenseTransformer;
-use Doctrine\Common\Util\ClassUtils;
+use Doctrine\Persistence\Proxy;
 use Doctrine\Persistence\Event\LifecycleEventArgs;
 
 class TypesenseIndexer
@@ -140,21 +140,21 @@ class TypesenseIndexer
 
     private function entityIsNotManaged($entity)
     {
-        $entityClassname = ClassUtils::getClass($entity);
+        $entityClassname = $entity instanceof Proxy ? $entity::class : get_class($entity);
 
         return !in_array($entityClassname, array_values($this->managedClassNames), true);
     }
 
     private function getCollectionName($entity)
     {
-        $entityClassname = ClassUtils::getClass($entity);
+        $entityClassname = $entity instanceof Proxy ? $entity::class : get_class($entity);
 
         return array_search($entityClassname, $this->managedClassNames, true);
     }
 
     private function getCollectionKey($entity)
     {
-        $entityClassname = ClassUtils::getClass($entity);
+        $entityClassname = $entity instanceof Proxy ? $entity::class : get_class($entity);
 
         foreach ($this->collectionManager->getCollectionDefinitions() as $key => $def) {
             if ($def['entity'] === $entityClassname) {
