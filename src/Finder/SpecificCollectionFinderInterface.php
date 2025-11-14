@@ -6,5 +6,11 @@ namespace ACSEO\TypesenseBundle\Finder;
 
 interface SpecificCollectionFinderInterface
 {
-    public function search($query, $queryBy);
+    public function search(string $query);
+
+    public function rawQuery(TypesenseQuery $query);
+
+    public function query(TypesenseQuery $query);
+
+    public function hydrateResponse(TypesenseResponse $response);
 }
