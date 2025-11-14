@@ -65,8 +65,6 @@ class CollectionFinder implements CollectionFinderInterface
 
             $unorderedResults = $query->getResult();
 
-            dump($unorderedResults);
-            die();
             // sort index
             $idIndex = array_flip($ids);
 
