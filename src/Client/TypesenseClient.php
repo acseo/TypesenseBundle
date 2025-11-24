@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace ACSEO\TypesenseBundle\Client;
 
+use ACSEO\TypesenseBundle\Logger\TypesenseLogger;
 use Typesense\Aliases;
 use Typesense\Client;
 use Typesense\Collections;
@@ -17,13 +18,18 @@ use Typesense\Operations;
 class TypesenseClient
 {
     private $client;
+    private $logger;
+    private $baseUrl;
 
-    public function __construct(string $url, string $apiKey)
+    public function __construct(string $url, string $apiKey, ?TypesenseLogger $logger = null)
     {
+        $this->logger = $logger;
+
         if ($url === 'null') {
             return;
         }
 
+        $this->baseUrl = $url;
         $urlParsed = parse_url($url);
 
         $this->client = new Client([
@@ -136,5 +142,15 @@ class TypesenseClient
     public function isOperationnal(): bool
     {
         return $this->client !== null;
+    }
+
+    public function getBaseUrl(): ?string
+    {
+        return $this->baseUrl;
+    }
+
+    public function getLogger(): ?TypesenseLogger
+    {
+        return $this->logger;
     }
 }
