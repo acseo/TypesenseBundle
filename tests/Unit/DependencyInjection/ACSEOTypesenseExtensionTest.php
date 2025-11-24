@@ -92,4 +92,20 @@ class ACSEOTypesenseExtensionTest extends TestCase
         $this->assertSame('acseo_prefix_books', $arguments['typesense_name']);
         $this->assertSame('books', $arguments['name']);
     }
+
+    public function testEmbeddingConfigurationWithCustomService()
+    {
+        $containerBuilder = new ContainerBuilder();
+        $containerBuilder->registerExtension($extension = new ACSEOTypesenseExtension());
+        $containerBuilder->setParameter('kernel.debug', true);
+
+        $loader = new YamlFileLoader($containerBuilder, new FileLocator(__DIR__.'/fixtures'));
+        $loader->load('acseo_typesense.yml');
+
+        $extensionConfig = $containerBuilder->getExtensionConfig($extension->getAlias());
+        $extension->load($extensionConfig, $containerBuilder);
+
+        $this->assertTrue($containerBuilder->hasDefinition('typesense.client'));
+        $this->assertTrue($containerBuilder->hasDefinition('typesense.finder.books'));
+    }
 }
