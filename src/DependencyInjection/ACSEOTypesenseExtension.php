@@ -142,6 +142,7 @@ class ACSEOTypesenseExtension extends Extension
                 'token_separators'      => $config['token_separators'],
                 'symbols_to_index'      => $config['symbols_to_index'],
                 'enable_nested_fields'  => $config['enable_nested_fields'] ?? false,
+                'embed'                 => $config['embed'] ?? null,
             ];
         }
     }
