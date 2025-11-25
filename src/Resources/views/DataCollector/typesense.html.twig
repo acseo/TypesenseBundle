@@ -40,9 +40,29 @@
 {% block head %}
     {{ parent() }}
     <style>
-        /* Custom label colors */
-        .label.info { background: #3f51b5; color: #fff; }
-        .label.collection { background: #607D8B; color: #fff; }
+        /* Typesense brand colors */
+        :root {
+            --typesense-green: #c0ff58;
+            --typesense-blue: #353fd7;
+            --badge-typesense-background: transparent;
+            --badge-typesense-border: 1px solid #9fcc45;
+            --badge-typesense-color: #9fcc45;
+            --badge-info-background: transparent;
+            --badge-info-border: 1px solid #5865f2;
+            --badge-info-color: #5865f2;
+        }
+
+        /* Custom label styles matching Symfony pattern */
+        .label.collection {
+            background: var(--badge-typesense-background);
+            border: var(--badge-typesense-border);
+            color: var(--badge-typesense-color);
+        }
+        .label.info {
+            background: var(--badge-info-background);
+            border: var(--badge-info-border);
+            color: var(--badge-info-color);
+        }
 
         /* Query header layout */
         .query-header {
@@ -68,6 +88,8 @@
         details {
             max-width: 100%;
             overflow: hidden;
+            display: block;
+            width: 100%;
         }
         details summary {
             cursor: pointer;
@@ -78,6 +100,9 @@
             border-radius: 3px;
             display: inline-block;
             user-select: none;
+        }
+        details[open] {
+            display: block;
         }
         details summary:hover {
             background: #e0e0e0;
@@ -103,9 +128,40 @@
         table td:has(details) {
             max-width: 600px;
             overflow: hidden;
+            vertical-align: top;
+        }
+        table td {
+            vertical-align: top;
+        }
+
+        /* Nested tables inside details */
+        details table {
+            width: 100%;
+            margin-top: 10px;
+            border-collapse: collapse;
+        }
+        details table td {
+            padding: 5px 8px;
+            vertical-align: top;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        details h5 {
+            margin: 10px 0 5px 0;
+            color: #666;
+            font-size: 13px;
         }
 
         /* Dark mode support */
+        .theme-dark {
+            --badge-typesense-background: transparent;
+            --badge-typesense-border: 1px solid #c0ff58;
+            --badge-typesense-color: #c0ff58;
+            --badge-typesense-shadow: 0 0 0 3px rgba(192, 255, 88, 0.15);
+            --badge-info-background: transparent;
+            --badge-info-border: 1px solid #7c8aff;
+            --badge-info-color: #7c8aff;
+            --badge-info-shadow: 0 0 0 3px rgba(124, 138, 255, 0.15);
+        }
         .theme-dark .query-header {
             background: #2d2d2d;
             border-left-color: #666;
@@ -125,6 +181,12 @@
             background: #2d2d2d;
             border-color: #444;
             color: #ddd;
+        }
+        .theme-dark details table td {
+            border-bottom-color: #444;
+        }
+        .theme-dark details h5 {
+            color: #aaa;
         }
     </style>
 {% endblock %}
@@ -267,6 +329,34 @@
                                     <details>
                                         <summary>🔍 Vector query ({{ value|length }} chars)</summary>
                                         <pre>{{ value|replace({',': ',\n'}) }}</pre>
+                                    </details>
+                                {% elseif key == 'searches' and value is iterable %}
+                                    <details>
+                                        <summary>📦 View Multi-search queries ({{ value|length }} searches)</summary>
+                                        {% for idx, search in value %}
+                                            <h5>Search #{{ idx + 1 }}</h5>
+                                            <table>
+                                                <tbody>
+                                                {% for skey, svalue in search %}
+                                                    <tr>
+                                                        <td><strong>{{ skey }}</strong></td>
+                                                        <td>
+                                                            {% if skey == 'vector_query' %}
+                                                                <details>
+                                                                    <summary>🔍 Vector query ({{ svalue|length }} chars)</summary>
+                                                                    <pre>{{ svalue|replace({',': ',\n'}) }}</pre>
+                                                                </details>
+                                                            {% elseif svalue is iterable %}
+                                                                <pre>{{ svalue|json_encode(constant('JSON_PRETTY_PRINT')) }}</pre>
+                                                            {% else %}
+                                                                {{ svalue }}
+                                                            {% endif %}
+                                                        </td>
+                                                    </tr>
+                                                {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        {% endfor %}
                                     </details>
                                 {% elseif value is iterable %}
                                     <pre>{{ value|json_encode(constant('JSON_PRETTY_PRINT')) }}</pre>

@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace ACSEO\TypesenseBundle\Logger;
 
+use Webmozart\Assert\Assert;
+
 /**
  * Logger for Typesense queries
  *
  * Inspired by FOSElasticaBundle's ElasticaLogger pattern
  */
-class TypesenseLogger
+class TypesenseLogger implements QueryLoggerInterface
 {
     private array $queries = [];
     private int $nbQueries = 0;
@@ -33,7 +35,18 @@ class TypesenseLogger
         ?string $method = null,
         ?string $endpoint = null
     ): void {
-        $httpMethod = $method ?? (isset($params['vector_query']) ? 'POST' : 'GET');
+        if ($method === null) {
+            if (str_contains($operation, 'multi_search')) {
+                $httpMethod = 'POST';
+            } elseif (isset($params['vector_query'])) {
+                $httpMethod = 'POST';
+            } else {
+                $httpMethod = 'GET';
+            }
+        } else {
+            $httpMethod = $method;
+        }
+
         $httpEndpoint = $endpoint ?? $this->buildEndpoint($collection, $operation);
         $fullUrl = $this->baseUrl ? rtrim($this->baseUrl, '/') . $httpEndpoint : $httpEndpoint;
 
