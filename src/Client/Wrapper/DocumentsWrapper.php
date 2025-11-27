@@ -8,7 +8,7 @@ use ACSEO\TypesenseBundle\Logger\QueryLoggerInterface;
 use Typesense\Documents;
 use Webmozart\Assert\Assert;
 
-class DocumentsWrapper
+class DocumentsWrapper implements \ArrayAccess
 {
     private Documents $documents;
     private ?QueryLoggerInterface $logger;
@@ -47,6 +47,26 @@ class DocumentsWrapper
 
             throw $e;
         }
+    }
+
+    public function offsetExists($offset): bool
+    {
+        return isset($this->documents[$offset]);
+    }
+
+    public function offsetGet($offset): mixed
+    {
+        return $this->documents[$offset];
+    }
+
+    public function offsetSet($offset, $value): void
+    {
+        $this->documents[$offset] = $value;
+    }
+
+    public function offsetUnset($offset): void
+    {
+        unset($this->documents[$offset]);
     }
 
     public function __call($name, $arguments)
