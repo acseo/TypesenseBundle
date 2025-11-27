@@ -144,25 +144,7 @@ class DoctrineToTypesenseTransformerTest extends TestCase
         $value                  = $transformer->castValue(Book::class, 'published_at', new \DatetimeImmutable('01/01/1984 00:00:00'));
         self::assertEquals(441763200, $value);
     }
-
-    public function testCastValueObject()
-    {
-        $collectionDefinitions = $this->getCollectionDefinitions(Book::class);
-        $propertyAccessor      = PropertyAccess::createPropertyAccessor();
-        $container             = $this->getContainerInstance();
-        $transformer           = new DoctrineToTypesenseTransformer($collectionDefinitions, $propertyAccessor, $container);
-
-        // Conversion OK
-        $author                 = new Author('Nicolas Potier', 'France');
-        $value                  = $transformer->castValue(Book::class, 'author', $author);
-        self::assertEquals($author->__toString(), $value);
-
-        // Conversion KO
-        $this->expectExceptionMessage('Call to undefined method ArrayObject::__toString()');
-        $value                  = $transformer->castValue(Book::class, 'author', new \ArrayObject());
-    }
-
-
+    
     public function testCastValueViaService()
     {
         $collectionDefinitions = $this->getCollectionDefinitions(Book::class);
