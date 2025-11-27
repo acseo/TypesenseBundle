@@ -10,6 +10,7 @@ abstract class AbstractTransformer
     public const TYPE_DATETIME     = 'datetime';
     public const TYPE_PRIMARY      = 'primary';
     public const TYPE_OBJECT       = 'object';
+    public const TYPE_ARRAY_OBJECT = 'object[]';
     public const TYPE_ARRAY_STRING = 'string[]';
     public const TYPE_STRING       = 'string';
     public const TYPE_INT_32       = 'int32';
@@ -46,9 +47,6 @@ abstract class AbstractTransformer
             return self::TYPE_INT_64;
         }
         if ($type === self::TYPE_PRIMARY) {
-            return self::TYPE_STRING;
-        }
-        if ($type === self::TYPE_OBJECT) {
             return self::TYPE_STRING;
         }
         if ($type === self::TYPE_BOOL) {

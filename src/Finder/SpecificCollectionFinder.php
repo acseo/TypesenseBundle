@@ -34,6 +34,15 @@ class SpecificCollectionFinder implements SpecificCollectionFinderInterface
 
     public function query(TypesenseQuery $query)
     {
+        $queryBy = $this->arguments['query_by'] ?? null;
+        if ($queryBy != null) {
+            unset($this->arguments['query_by']);
+        }
+
+        foreach ($this->arguments as $key => $value) {
+            $query->addParameter($key, $value);
+        }
+        
         return $this->finder->query($query);
     }
 
