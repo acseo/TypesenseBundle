@@ -20,7 +20,7 @@ use Doctrine\DBAL\Connection;
 use Doctrine\ORM\Query;
 use Doctrine\ORM\Configuration;
 use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\Event\LifecycleEventArgs;
+use Doctrine\Persistence\Event\LifecycleEventArgs;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Tester\CommandTester;
@@ -127,7 +127,7 @@ class TypesenseInteractionsTest extends KernelTestCase
         $bookDefinition        = $collectionDefinitions['books'];
 
         $bookFinder = new CollectionFinder($collectionClient, $em, $bookDefinition);
-        $query = new TypesenseQuery('Nicolas', 'author');
+        $query = new TypesenseQuery('Nicolas', 'author_name');
 
         $query->maxHits($nbBooks < 250 ? $nbBooks : 250);
         $query->perPage($nbBooks < 250 ? $nbBooks : 250);
@@ -292,6 +292,7 @@ class TypesenseInteractionsTest extends KernelTestCase
                 'entity'         => $entityClass,
                 'name'           => 'books',
                 'default_sorting_field' => 'sortable_id',
+                'enable_nested_fields' => true,
                 'fields'         => [
                     'id' => [
                         'name'             => 'id',
@@ -313,6 +314,11 @@ class TypesenseInteractionsTest extends KernelTestCase
                         'type'             => 'object',
                         'entity_attribute' => 'author',
                     ],
+                    'author_name' => [
+                        'name'             => 'author_name',
+                        'type'             => 'string',
+                        'entity_attribute' => 'author.name',
+                    ],
                     'country' => [
                         'name'             => 'author_country',
                         'type'             => 'string',
@@ -330,8 +336,8 @@ class TypesenseInteractionsTest extends KernelTestCase
                         'optional'         => false,
                         "embed" => [
                             "from" => [
-                                "author",
-                                "title"
+                                "title",
+                                "author_name"
                             ],
                             "model_config" => [
                                 "model_name" => "ts/e5-small"

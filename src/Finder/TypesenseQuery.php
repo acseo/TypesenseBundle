@@ -8,7 +8,7 @@ class TypesenseQuery
 {
     private $searchParameters;
 
-    public function __construct(string $q = null, string $queryBy = null)
+    public function __construct(?string $q, ?string $queryBy)
     {
         $this->searchParameters = [];
         if ($q !== null) {
