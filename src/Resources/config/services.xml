@@ -11,6 +11,7 @@
                  abstract="true">
             <argument/> <!-- host -->
             <argument/> <!-- key -->
+            <argument type="service" id="typesense.logger" on-invalid="null"/> <!-- logger -->
         </service>
 
         <!-- Abstract definition for all generic finders. -->
@@ -33,10 +34,22 @@
             <argument/> <!-- routes -->
         </service>
 
+        <!-- Logger -->
+        <service id="typesense.logger" class="ACSEO\TypesenseBundle\Logger\TypesenseLogger" public="false"/>
+        <service id="ACSEO\TypesenseBundle\Logger\TypesenseLogger" alias="typesense.logger"/>
+
+        <!-- Data Collector -->
+        <service id="typesense.data_collector" class="ACSEO\TypesenseBundle\DataCollector\TypesenseDataCollector" public="false">
+            <argument type="service" id="typesense.logger"/>
+            <tag name="data_collector" template="@ACSEOTypesense/DataCollector/typesense.html.twig" id="typesense" priority="300"/>
+        </service>
+
         <service id="typesense.collection_client" class="ACSEO\TypesenseBundle\Client\CollectionClient" public="true">
             <argument type="service" id="typesense.client"/>
+            <argument type="service" id="typesense.logger" on-invalid="null"/>
         </service>
         <service id="ACSEO\TypesenseBundle\Client\CollectionClient" alias="typesense.collection_client"/>
+        <service id="ACSEO\TypesenseBundle\Client\TypesenseClient" alias="typesense.client"/>
         <!-- typesense collection manager -->
         <service id="typesense.collection_manager" class="ACSEO\TypesenseBundle\Manager\CollectionManager"
                  public="true">

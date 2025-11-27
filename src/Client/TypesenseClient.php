@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace ACSEO\TypesenseBundle\Client;
 
+use ACSEO\TypesenseBundle\Client\Wrapper\CollectionsWrapper;
+use ACSEO\TypesenseBundle\Client\Wrapper\MultiSearchWrapper;
+use ACSEO\TypesenseBundle\Logger\QueryLoggerInterface;
 use Typesense\Aliases;
 use Typesense\Client;
 use Typesense\Collections;
@@ -17,13 +20,18 @@ use Typesense\Operations;
 class TypesenseClient
 {
     private $client;
+    private $logger;
+    private $baseUrl;
 
-    public function __construct(string $url, string $apiKey)
+    public function __construct(string $url, string $apiKey, ?QueryLoggerInterface $logger = null)
     {
+        $this->logger = $logger;
+
         if ($url === 'null') {
             return;
         }
 
+        $this->baseUrl = $url;
         $urlParsed = parse_url($url);
 
         $this->client = new Client([
@@ -39,13 +47,13 @@ class TypesenseClient
         ]);
     }
 
-    public function getCollections(): ?Collections
+    public function getCollections(): ?CollectionsWrapper
     {
         if (!$this->client) {
             return null;
         }
 
-        return $this->client->collections;
+        return new CollectionsWrapper($this->client->collections, $this->logger);
     }
 
     public function getAliases(): ?Aliases
@@ -102,13 +110,13 @@ class TypesenseClient
         return $this->client->operations;
     }
 
-    public function getMultiSearch(): ?MultiSearch
+    public function getMultiSearch(): ?MultiSearchWrapper
     {
         if (!$this->client) {
             return null;
         }
 
-        return $this->client->multiSearch;
+        return new MultiSearchWrapper($this->client->multiSearch, $this->logger);
     }
 
     /**
@@ -130,11 +138,31 @@ class TypesenseClient
             return null;
         }
 
-        return $this->client->{$name};
+        $value = $this->client->{$name};
+
+        if ($name === 'collections') {
+            return new CollectionsWrapper($value, $this->logger);
+        }
+
+        if ($name === 'multiSearch') {
+            return new MultiSearchWrapper($value, $this->logger);
+        }
+
+        return $value;
     }
 
     public function isOperationnal(): bool
     {
         return $this->client !== null;
+    }
+
+    public function getBaseUrl(): ?string
+    {
+        return $this->baseUrl;
+    }
+
+    public function getLogger(): ?QueryLoggerInterface
+    {
+        return $this->logger;
     }
 }

@@ -4,15 +4,22 @@ declare(strict_types=1);
 
 namespace ACSEO\TypesenseBundle\Client;
 
+use ACSEO\TypesenseBundle\Logger\QueryLoggerInterface;
 use ACSEO\TypesenseBundle\Finder\TypesenseQuery;
 
 class CollectionClient
 {
     private $client;
+    private $logger;
 
-    public function __construct(TypesenseClient $client)
+    public function __construct(TypesenseClient $client, ?QueryLoggerInterface $logger = null)
     {
         $this->client = $client;
+        $this->logger = $logger;
+
+        if ($this->logger && $this->client->getBaseUrl()) {
+            $this->logger->setBaseUrl($this->client->getBaseUrl());
+        }
     }
 
     public function search(string $collectionName, TypesenseQuery $query)
@@ -21,7 +28,28 @@ class CollectionClient
             return null;
         }
 
-        return $this->client->collections[$collectionName]->documents->search($query->getParameters());
+        $startTime = microtime(true);
+        $error = null;
+
+        try {
+            $result = $this->client->collections[$collectionName]->documents->search($query->getParameters());
+
+            if ($this->logger) {
+                $duration = microtime(true) - $startTime;
+                $this->logger->logQuery($collectionName, 'search', $query->getParameters(), $duration, null, $result);
+            }
+
+            return $result;
+        } catch (\Exception $e) {
+            $error = $e->getMessage();
+
+            if ($this->logger) {
+                $duration = microtime(true) - $startTime;
+                $this->logger->logQuery($collectionName, 'search', $query->getParameters(), $duration, $error, null);
+            }
+
+            throw $e;
+        }
     }
 
     public function multiSearch(array $searchRequests, ?TypesenseQuery $commonSearchParams = null)
@@ -41,12 +69,31 @@ class CollectionClient
             $searches[] = $sr->getParameters();
         }
 
-        return $this->client->multiSearch->perform(
-            [
-                'searches' => $searches,
-            ],
-            $commonSearchParams ? $commonSearchParams->getParameters() : []
-        );
+        $startTime = microtime(true);
+        $error = null;
+
+        try {
+            $result = $this->client->multiSearch->perform(
+                ['searches' => $searches],
+                $commonSearchParams ? $commonSearchParams->getParameters() : []
+            );
+
+            if ($this->logger) {
+                $duration = microtime(true) - $startTime;
+                $this->logger->logQuery(null, 'multi_search', ['searches' => $searches], $duration, null, $result);
+            }
+
+            return $result;
+        } catch (\Exception $e) {
+            $error = $e->getMessage();
+
+            if ($this->logger) {
+                $duration = microtime(true) - $startTime;
+                $this->logger->logQuery(null, 'multi_search', ['searches' => $searches], $duration, $error, null);
+            }
+
+            throw $e;
+        }
     }
 
     public function list()
