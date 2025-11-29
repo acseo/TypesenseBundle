@@ -58,7 +58,7 @@ class CollectionClient
         return $this->client->collections->retrieve();
     }
 
-    public function create($name, $fields, $defaultSortingField, array $tokenSeparators, array $symbolsToIndex, bool $enableNestedFields = false, ?array $embed = null)
+    public function create($name, $fields, $defaultSortingField, array $tokenSeparators, array $symbolsToIndex, bool $enableNestedFields = false)
     {
         if (!$this->client->isOperationnal()) {
             return null;
@@ -72,10 +72,6 @@ class CollectionClient
             'symbols_to_index'      => $symbolsToIndex,
             'enable_nested_fields'  => $enableNestedFields,
         ];
-        
-        if ($embed) {
-            $options['embed'] = $embed;
-        }
 
         $this->client->collections->create($options);
     }

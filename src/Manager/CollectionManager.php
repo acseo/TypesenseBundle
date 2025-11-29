@@ -79,8 +79,7 @@ class CollectionManager
             $definition['default_sorting_field'],
             $tokenSeparators,
             $symbolsToIndex,
-            $definition['enable_nested_fields'] ?? false,
-            $definition['embed'] ?? null
+            $definition['enable_nested_fields'] ?? false
         );
     }
 }
