@@ -92,4 +92,39 @@ class ACSEOTypesenseExtensionTest extends TestCase
         $this->assertSame('acseo_prefix_books', $arguments['typesense_name']);
         $this->assertSame('books', $arguments['name']);
     }
+
+    public function testEmbeddingConfigurationWithCustomService()
+    {
+        $containerBuilder = new ContainerBuilder();
+        $containerBuilder->registerExtension($extension = new ACSEOTypesenseExtension());
+        $containerBuilder->setParameter('kernel.debug', true);
+
+        $loader = new YamlFileLoader($containerBuilder, new FileLocator(__DIR__.'/fixtures'));
+        $loader->load('acseo_typesense.yml');
+
+        $extensionConfig = $containerBuilder->getExtensionConfig($extension->getAlias());
+        $extension->load($extensionConfig, $containerBuilder);
+
+        $this->assertTrue($containerBuilder->hasDefinition('typesense.client'));
+        $this->assertTrue($containerBuilder->hasDefinition('typesense.finder.books'));
+
+        // Verify that embed configuration is properly stored at field level
+        $managerDefinition = $containerBuilder->getDefinition('typesense.collection_manager');
+        $collections = $managerDefinition->getArgument(2);
+
+        $this->assertArrayHasKey('books', $collections);
+        $this->assertArrayHasKey('embeddings', $collections['books']['fields']);
+
+        $embeddingsField = $collections['books']['fields']['embeddings'];
+        $this->assertArrayHasKey('embed', $embeddingsField);
+        $this->assertArrayHasKey('from', $embeddingsField['embed']);
+        $this->assertArrayHasKey('model_config', $embeddingsField['embed']);
+        $this->assertEquals(['title'], $embeddingsField['embed']['from']);
+        $this->assertEquals('openai/test-model', $embeddingsField['embed']['model_config']['model_name']);
+        $this->assertEquals('test-api-key', $embeddingsField['embed']['model_config']['api_key']);
+        $this->assertEquals('http://test-url:8080', $embeddingsField['embed']['model_config']['url']);
+
+        // Verify that there is NO embed parameter at collection level
+        $this->assertArrayNotHasKey('embed', $collections['books']);
+    }
 }

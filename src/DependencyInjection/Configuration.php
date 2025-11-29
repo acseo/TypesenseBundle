@@ -51,6 +51,8 @@ class Configuration implements ConfigurationInterface
                                                 ->arrayNode('model_config')
                                                     ->children()
                                                         ->scalarNode('model_name')->isRequired()->end()
+                                                        ->scalarNode('api_key')->cannotBeEmpty()->end()
+                                                        ->scalarNode('url')->cannotBeEmpty()->end()
                                                     ->end()
                                                 ->end()
                                             ->end()
