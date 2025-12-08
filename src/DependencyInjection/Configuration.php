@@ -43,6 +43,7 @@ class Configuration implements ConfigurationInterface
                                         ->booleanNode('infix')->end()
                                         ->booleanNode('optional')->end()
                                         ->booleanNode('sort')->end()
+                                        ->scalarNode('collection_field')->end()
                                         ->arrayNode('embed')
                                             ->children()
                                                 ->arrayNode('from')

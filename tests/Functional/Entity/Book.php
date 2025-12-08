@@ -11,14 +11,16 @@ class Book
     private $author;
     private $publishedAt;
     private $active;
+    private $tags;
 
-    public function __construct($id, string $title, $author, \DateTimeInterface $publishedAt, $active = false)
+    public function __construct($id, string $title, $author, \DateTimeInterface $publishedAt, $active = false, $tags = null)
     {
         $this->id          = $id;
         $this->title       = $title;
         $this->author      = $author;
         $this->publishedAt = $publishedAt;
         $this->active      = $active;
+        $this->tags        = $tags;
     }
 
     /**
@@ -107,6 +109,24 @@ class Book
     public function setActive(bool $active)
     {
         $this->active = $active;
+
+        return $this;
+    }
+
+    /**
+     * Get the value of tags.
+     */
+    public function getTags()
+    {
+        return $this->tags;
+    }
+
+    /**
+     * Set the value of tags.
+     */
+    public function setTags($tags): self
+    {
+        $this->tags = $tags;
 
         return $this;
     }
