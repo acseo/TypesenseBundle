@@ -104,14 +104,21 @@ class DoctrineToTypesenseTransformer extends AbstractTransformer
 
                 return null;
             case self::TYPE_COLLECTION.self::TYPE_ARRAY_STRING:
-                return array_values(
-                    $value->map(function ($v) use($isOptional) {
-                        if ($isOptional == true && $v == null) {
+                $collectionField = $collectionFieldsDefinitions[$key]['collection_field'] ?? null;
+                $accessor = $this->accessor;
+                return array_values(array_filter(
+                    $value->map(function ($v) use ($isOptional, $collectionField, $accessor) {
+                        if ($isOptional && $v === null) {
                             return null;
                         }
+                        if ($collectionField) {
+                            $fieldValue = $accessor->getValue($v, $collectionField);
+                            return $fieldValue !== null ? (string) $fieldValue : null;
+                        }
                         return $v->__toString();
-                    })->toArray()
-                );
+                    })->toArray(),
+                    fn ($item) => $item !== null
+                ));
             case self::TYPE_STRING.self::TYPE_STRING:
             case self::TYPE_PRIMARY.self::TYPE_STRING:
                 return (string) $value;
