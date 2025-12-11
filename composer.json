@@ -14,7 +14,7 @@
         "doctrine/orm": "^2.8 || ^3.2",
         "symfony/framework-bundle": "^4.3|^5|^6.0|^7.0",
         "symfony/console": "^4.3.4|^5|^6.0|^7.0",
-        "typesense/typesense-php": "^4.1",
+        "typesense/typesense-php": "^4.5",
         "php-http/curl-client": "^2.2",
         "monolog/monolog": "^2.3|^3.0",
         "symfony/property-access": "^3.4|^4.3|^5|^6.0|^7.0",
@@ -24,7 +24,7 @@
         "symfony/phpunit-bridge": "^5.0|^6.0",
         "phpunit/phpunit": "^9.5",
         "symfony/yaml": "^3.4 || ^4.4 || ^5.4 || ^6.0",
-        "dg/bypass-finals": "^1.4",
+        "dg/bypass-finals": "^1.9",
         "phpspec/prophecy-phpunit": "^2.0"
     },
     "autoload": {
