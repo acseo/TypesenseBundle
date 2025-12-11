@@ -7,6 +7,8 @@ namespace ACSEO\TypesenseBundle\Tests\Transformer;
 use ACSEO\TypesenseBundle\Tests\Functional\Entity\Book;
 use ACSEO\TypesenseBundle\Tests\Functional\Entity\BookOnline;
 use ACSEO\TypesenseBundle\Tests\Functional\Entity\Author;
+use ACSEO\TypesenseBundle\Tests\Functional\Entity\Tag;
+use Doctrine\Common\Collections\ArrayCollection;
 use ACSEO\TypesenseBundle\Tests\Functional\Service\BookConverter;
 use ACSEO\TypesenseBundle\Tests\Functional\Service\ExceptionBookConverter;
 use ACSEO\TypesenseBundle\Transformer\DoctrineToTypesenseTransformer;
@@ -145,6 +147,66 @@ class DoctrineToTypesenseTransformerTest extends TestCase
         self::assertEquals(441763200, $value);
     }
     
+    public function testCollectionFieldWithCustomField()
+    {
+        $collectionDefinitions = $this->getCollectionDefinitionsWithTags(Book::class);
+        $propertyAccessor = PropertyAccess::createPropertyAccessor();
+        $container = $this->getContainerInstance();
+        $transformer = new DoctrineToTypesenseTransformer($collectionDefinitions, $propertyAccessor, $container);
+
+        $tags = new ArrayCollection([
+            new Tag(1, 'PHP'),
+            new Tag(2, 'Symfony'),
+            new Tag(3, 'Typesense'),
+        ]);
+
+        $book = new Book(1, 'test', new Author('Nicolas Potier', 'France'), new \Datetime('01/01/1984 00:00:00'), false, $tags);
+        $result = $transformer->convert($book);
+
+        // With collection_field: id, we should get the IDs instead of labels
+        self::assertEquals(['1', '2', '3'], $result['tag_ids']);
+    }
+
+    public function testCollectionFieldWithoutCustomField()
+    {
+        $collectionDefinitions = $this->getCollectionDefinitionsWithTagsNoCustomField(Book::class);
+        $propertyAccessor = PropertyAccess::createPropertyAccessor();
+        $container = $this->getContainerInstance();
+        $transformer = new DoctrineToTypesenseTransformer($collectionDefinitions, $propertyAccessor, $container);
+
+        $tags = new ArrayCollection([
+            new Tag(1, 'PHP'),
+            new Tag(2, 'Symfony'),
+            new Tag(3, 'Typesense'),
+        ]);
+
+        $book = new Book(1, 'test', new Author('Nicolas Potier', 'France'), new \Datetime('01/01/1984 00:00:00'), false, $tags);
+        $result = $transformer->convert($book);
+
+        // Without collection_field, we should get the __toString() values (labels)
+        self::assertEquals(['PHP', 'Symfony', 'Typesense'], $result['tag_labels']);
+    }
+
+    public function testCollectionFieldWithNullValues()
+    {
+        $collectionDefinitions = $this->getCollectionDefinitionsWithTagsLabel(Book::class);
+        $propertyAccessor = PropertyAccess::createPropertyAccessor();
+        $container = $this->getContainerInstance();
+        $transformer = new DoctrineToTypesenseTransformer($collectionDefinitions, $propertyAccessor, $container);
+
+        $tags = new ArrayCollection([
+            new Tag(1, 'PHP'),
+            new Tag(2, null),
+            new Tag(3, 'Typesense'),
+        ]);
+
+        $book = new Book(1, 'test', new Author('Nicolas Potier', 'France'), new \Datetime('01/01/1984 00:00:00'), false, $tags);
+        $result = $transformer->convert($book);
+
+        // Null values should be filtered out
+        self::assertEquals(['PHP', 'Typesense'], $result['tag_labels']);
+    }
+
     public function testCastValueViaService()
     {
         $collectionDefinitions = $this->getCollectionDefinitions(Book::class);
@@ -256,5 +318,94 @@ class DoctrineToTypesenseTransformerTest extends TestCase
         $containerInstance->set('ACSEO\TypesenseBundle\Tests\Functional\Service\BookConverter', new BookConverter());
         $containerInstance->set('ACSEO\TypesenseBundle\Tests\Functional\Service\ExceptionBookConverter', new ExceptionBookConverter());
         return $containerInstance;
+    }
+
+    private function getCollectionDefinitionsWithTags($entityClass)
+    {
+        return [
+            'books' => [
+                'typesense_name' => 'books',
+                'entity'         => $entityClass,
+                'name'           => 'books',
+                'fields'         => [
+                    'id' => [
+                        'name'             => 'id',
+                        'type'             => 'primary',
+                        'entity_attribute' => 'id',
+                    ],
+                    'sortable_id' => [
+                        'entity_attribute' => 'id',
+                        'name'             => 'sortable_id',
+                        'type'             => 'int32',
+                    ],
+                    'tag_ids' => [
+                        'name'             => 'tag_ids',
+                        'type'             => 'collection',
+                        'entity_attribute' => 'tags',
+                        'collection_field' => 'id',
+                    ],
+                ],
+                'default_sorting_field' => 'sortable_id',
+            ],
+        ];
+    }
+
+    private function getCollectionDefinitionsWithTagsNoCustomField($entityClass)
+    {
+        return [
+            'books' => [
+                'typesense_name' => 'books',
+                'entity'         => $entityClass,
+                'name'           => 'books',
+                'fields'         => [
+                    'id' => [
+                        'name'             => 'id',
+                        'type'             => 'primary',
+                        'entity_attribute' => 'id',
+                    ],
+                    'sortable_id' => [
+                        'entity_attribute' => 'id',
+                        'name'             => 'sortable_id',
+                        'type'             => 'int32',
+                    ],
+                    'tag_labels' => [
+                        'name'             => 'tag_labels',
+                        'type'             => 'collection',
+                        'entity_attribute' => 'tags',
+                    ],
+                ],
+                'default_sorting_field' => 'sortable_id',
+            ],
+        ];
+    }
+
+    private function getCollectionDefinitionsWithTagsLabel($entityClass)
+    {
+        return [
+            'books' => [
+                'typesense_name' => 'books',
+                'entity'         => $entityClass,
+                'name'           => 'books',
+                'fields'         => [
+                    'id' => [
+                        'name'             => 'id',
+                        'type'             => 'primary',
+                        'entity_attribute' => 'id',
+                    ],
+                    'sortable_id' => [
+                        'entity_attribute' => 'id',
+                        'name'             => 'sortable_id',
+                        'type'             => 'int32',
+                    ],
+                    'tag_labels' => [
+                        'name'             => 'tag_labels',
+                        'type'             => 'collection',
+                        'entity_attribute' => 'tags',
+                        'collection_field' => 'label',
+                    ],
+                ],
+                'default_sorting_field' => 'sortable_id',
+            ],
+        ];
     }
 }
