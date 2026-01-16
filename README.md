@@ -99,8 +99,12 @@ acseo_typesense:
                         from:
                             - title
                             - description
-                        model_config: 
-                            model_name: ts/e5-small
+                        model_config:
+                            model_name: ts/e5-small  # Typesense Cloud model (requires Typesense Cloud)
+                            # For custom embedding services (Ollama, local models, etc.):
+                            # model_name: 'openai/your-model-name'
+                            # url: 'http://your-embedding-service:port'
+                            # api_key: 'your-api-key'  # Optional
             default_sorting_field: sortable_id       # Default sorting field. Must be int32 or float
             symbols_to_index: ['+']                  # Optional - You can add + to this list to make the word c++ indexable verbatim.
         users:
@@ -327,7 +331,7 @@ $commonParams = new TypesenseQuery()->addParameter('query_by', 'name');
 $response = $this->collectionClient->multisearch($searchRequests, $commonParams);
 ```
 
-## Cookbook 
+## Cookbook
 ----------------
 
 * [Use Typesense to make an autocomplete field](doc/cookbook/autocomplete.md)
