@@ -5,15 +5,16 @@ declare(strict_types=1);
 namespace ACSEO\TypesenseBundle\Command;
 
 use ACSEO\TypesenseBundle\Manager\CollectionManager;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
+#[AsCommand(name: 'typesense:create', description: 'Create Typesense indexes')]
 class CreateCommand extends Command
 {
-    protected static $defaultName = 'typesense:create';
     private $collectionManager;
 
     public function __construct(CollectionManager $collectionManager)
@@ -22,13 +23,10 @@ class CreateCommand extends Command
         $this->collectionManager = $collectionManager;
     }
 
-    protected function configure()
+    protected function configure(): void
     {
         $this
-            ->setName(self::$defaultName)
             ->addOption('indexes', null, InputOption::VALUE_OPTIONAL, 'The index(es) to repopulate. Comma separated values')
-            ->setDescription('Create Typsenses indexes')
-
         ;
     }
 

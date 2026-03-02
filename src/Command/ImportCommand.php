@@ -8,16 +8,16 @@ use ACSEO\TypesenseBundle\Manager\CollectionManager;
 use ACSEO\TypesenseBundle\Manager\DocumentManager;
 use ACSEO\TypesenseBundle\Transformer\DoctrineToTypesenseTransformer;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
+#[AsCommand(name: 'typesense:import', description: 'Import collections from Database')]
 class ImportCommand extends Command
 {
-    protected static $defaultName = 'typesense:import';
-
     private $em;
     private $collectionManager;
     private $documentManager;
@@ -42,11 +42,9 @@ class ImportCommand extends Command
         $this->transformer       = $transformer;
     }
 
-    protected function configure()
+    protected function configure(): void
     {
         $this
-            ->setName(self::$defaultName)
-            ->setDescription('Import collections from Database')
             ->addOption('action', null, InputOption::VALUE_OPTIONAL, 'Action modes for typesense import ("create", "upsert" or "update")', 'upsert')
             ->addOption('indexes', null, InputOption::VALUE_OPTIONAL, 'The index(es) to repopulate. Comma separated values')
             ->addOption('first-page', null, InputOption::VALUE_REQUIRED, 'The pager\'s page to start population from. Including the given page.', 1)
